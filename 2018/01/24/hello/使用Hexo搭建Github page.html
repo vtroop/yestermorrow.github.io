@@ -1,0 +1,60 @@
+<h2 id="tags"><a href="#tags" class="headerlink" title="tags:"></a>tags:</h2><h1 id="使用Hexo搭建Github-page"><a href="#使用Hexo搭建Github-page" class="headerlink" title="使用Hexo搭建Github page"></a>使用Hexo搭建Github page</h1><h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>Node.js安装（<a href="https://www.jianshu.com/p/03a76b2e7e00">链接</a>）<br>Git安装（<a href="http://blog.csdn.net/renfufei/article/details/41647875">链接</a>）</p>
+<h3 id="Hexo安装"><a href="#Hexo安装" class="headerlink" title="Hexo安装"></a>Hexo安装</h3><p>打开git bash.exe, 进入适当的文件夹路径 ，输入</p>
+<pre><code>$npm install -g hexo-cli
+</code></pre><p> 检查hexo是否安装成功</p>
+<pre><code>$ hexo -v
+hexo-cli: 1.0.4
+os: Windows_NT 10.0.15063 win32 x64
+http_parser: 2.7.0
+node: 8.9.4
+v8: 6.1.534.50
+uv: 1.15.0
+zlib: 1.2.11
+ares: 1.10.1-DEV
+modules: 57
+nghttp2: 1.25.0
+openssl: 1.0.2n
+icu: 59.1
+unicode: 9.0
+cldr: 31.0.1
+tz: 2017b
+</code></pre><p>初始化hexo</p>
+<pre><code>hexo init
+npm install
+</code></pre><p>安装Hexo关于启动服务器的插件</p>
+<pre><code>npm install hexo-server --save
+</code></pre><p>启动服务器</p>
+<pre><code>hexo server
+</code></pre><p>查看效果，网页打开localhost:4000,即可</p>
+<h3 id="搭建Git-pages"><a href="#搭建Git-pages" class="headerlink" title="搭建Git pages"></a>搭建Git pages</h3><p>github上新建仓库，命名为yourname.github.io</p>
+<p>安装Hexo关于git的组件</p>
+<pre><code>npm install hexo-deployer-git --save
+</code></pre><p>在_config.yml 中为 git 添加配置</p>
+<pre><code>// 这个一般是在最后,直接往下滑
+deploy:
+type: git
+repository: 你的仓库地址(https://github.com/用户名/用户名.github.io.git)
+branch: master
+</code></pre><p>执行(每次修改都要执行这些命令才能在github pages看到效果)<br>​<br>    hexo generate<br>    hexo deploy</p>
+<h3 id="写博客"><a href="#写博客" class="headerlink" title="写博客"></a>写博客</h3><p>新建博客<br>​<br>    //这个地方，当文章名为中文的时候，内容有中文不会出现乱码。但是当文章名是英文的时候，若内容中有中文就会出现乱码，摸索中<br>    hexo new  “文章名”</p>
+<p>命令结束后,会在 source/_post下自动生成一个 “文章名.md文件”.(你会看到一个 hello world.md 这个是默认的那个,可以删除)</p>
+<p>写好后,生成 部署即可. （需先进入博客目录，如cd d/blog）</p>
+<pre><code>hexo generate
+hexo deploy
+</code></pre><p>删除博客的话,直接将source/_post下对应的 .md文件删除即可 ;重新编译文章,找到这个.md文件打开重新编辑,最后 再次生成部署即可,有时候会存在一定的延迟,这跟网速有关.</p>
+<p>命令</p>
+<pre><code>hexo g = hexo generate
+hexo d = hexo deploy
+hexo s = hexo server
+</code></pre><h2 id="HEXO主题设置"><a href="#HEXO主题设置" class="headerlink" title="HEXO主题设置"></a>HEXO主题设置</h2><p>默认的hexo主题不喜欢的话可以自定义主题，就以最多使用的next主题为例，介绍一下主题设置流程</p>
+<p>进入blog下的themes文件夹，下载next主题</p>
+<pre><code>git clone https://github.com/iissnan/hexo-theme-next themes/next
+</code></pre><p>这样 D:\blog\themes就会出现next文件夹，下载的主题就在里面了</p>
+<h2 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h2><p>首先，需要在阿里云或者其他渠道购买域名，以笔者在阿里云购买的域名(www.wanyajing.top)为例<br><img src="./www.png" alt="Alt text"></p>
+<p>注意第一行和第二行记录值设置，CNAME设置为你的github.pages域名，如yestermorrow.github.io，A设置为你的github.pages指向的ip地址（ping一下yestermorrow.github.io就能知道ip啦）。等待五分钟左右，直接输入自己域名就能进入你的github.pages了。</p>
+<p> <strong>注意</strong><br> 1：每次修改_config.yml或者md文件时，本机起服务能看见效果，github.io博客看不见效果时</p>
+<pre><code>hexo clean
+hexo d -g
+</code></pre><p>2： 启动hexo服务器显示端口被占用时</p>
+<pre><code>hexo s -p 5000
+</code></pre><p>3：新建博客时，先hexo new “文章名”，再用马克飞象打开。若直接使用马克飞象新建文件，会出现hexo打开后显示文件名为———-未命名等异常情况。</p>
