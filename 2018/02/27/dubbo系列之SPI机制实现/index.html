@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="SPI," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="dubbo系列之SPI机制实现从这篇博客开始系统学习一下dubbo源码，相信能收获颇丰。 参考 初识SPISPI设计目标面向对象的设计里，模块之间是基于接口编程，模块之间不对实现类进行硬编码。一旦代码里涉及具体的实现类，就违反了可插拔的原则，如需要替换一种实现，就需要替换代码。为了实现在模块装配的时候，不在模块里面写代码，这就需要一种服务发现机制。java spi就是提供这样的一个机制：为某个接口">
+<meta name="keywords" content="SPI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dubbo系列之SPI机制实现">
+<meta property="og:url" content="http://yoursite.com/2018/02/27/dubbo系列之SPI机制实现/index.html">
+<meta property="og:site_name" content="Yestermorrow">
+<meta property="og:description" content="dubbo系列之SPI机制实现从这篇博客开始系统学习一下dubbo源码，相信能收获颇丰。 参考 初识SPISPI设计目标面向对象的设计里，模块之间是基于接口编程，模块之间不对实现类进行硬编码。一旦代码里涉及具体的实现类，就违反了可插拔的原则，如需要替换一种实现，就需要替换代码。为了实现在模块装配的时候，不在模块里面写代码，这就需要一种服务发现机制。java spi就是提供这样的一个机制：为某个接口">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-02-27T03:04:51.428Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dubbo系列之SPI机制实现">
+<meta name="twitter:description" content="dubbo系列之SPI机制实现从这篇博客开始系统学习一下dubbo源码，相信能收获颇丰。 参考 初识SPISPI设计目标面向对象的设计里，模块之间是基于接口编程，模块之间不对实现类进行硬编码。一旦代码里涉及具体的实现类，就违反了可插拔的原则，如需要替换一种实现，就需要替换代码。为了实现在模块装配的时候，不在模块里面写代码，这就需要一种服务发现机制。java spi就是提供这样的一个机制：为某个接口">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/27/dubbo系列之SPI机制实现/"/>
+
+
+
+
+
+  <title>dubbo系列之SPI机制实现 | Yestermorrow</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yestermorrow</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/27/dubbo系列之SPI机制实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宛亚菁">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/cat.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yestermorrow">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dubbo系列之SPI机制实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-27T10:16:47+08:00">
+                2018-02-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="dubbo系列之SPI机制实现"><a href="#dubbo系列之SPI机制实现" class="headerlink" title="dubbo系列之SPI机制实现"></a>dubbo系列之SPI机制实现</h1><p>从这篇博客开始系统学习一下dubbo源码，相信能收获颇丰。</p>
+<p>参考</p>
+<h3 id="初识SPI"><a href="#初识SPI" class="headerlink" title="初识SPI"></a>初识SPI</h3><h4 id="SPI设计目标"><a href="#SPI设计目标" class="headerlink" title="SPI设计目标"></a>SPI设计目标</h4><p>面向对象的设计里，模块之间是基于接口编程，模块之间不对实现类进行硬编码。一旦代码里涉及具体的实现类，就违反了可插拔的原则，如需要替换一种实现，就需要替换代码。为了实现在模块装配的时候，不在模块里面写代码，这就需要一种服务发现机制。java spi就是提供这样的一个机制：为某个接口寻找服务实现的机制。有点类似IOC的思想，就是将装配的控制权移到代码之外。</p>
+<h4 id="dubbo-SPI和-java-SPI的不同之处"><a href="#dubbo-SPI和-java-SPI的不同之处" class="headerlink" title="dubbo SPI和 java SPI的不同之处"></a>dubbo SPI和 java SPI的不同之处</h4><p>1：JDK标准得SPI会一次性实例化扩展点所有实现，如果有扩展实现初始化很耗时，但如果没用上也加载，会很浪费资源。</p>
+<p>2：dubbo SPI中增加了对扩展点IOC和AOP的支持，一个扩展点可以直接setter注入其他扩展点。</p>
+<h4 id="dubbo-SPI-约定"><a href="#dubbo-SPI-约定" class="headerlink" title="dubbo SPI 约定"></a>dubbo SPI 约定</h4><p>spi 文件 存储路径 在 META-INF\dubbo\internal 目录下 并且文件名为接口的全路径名 就是=接口的包名+接口名</p>
+<p>每个spi 文件里面的格式定义为： 扩展名=具体的类名，例如 dubbo=com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol。这和jdk SPI的区别就是多了——”扩展名=“，也正是通过这个”扩展名=“，也就是key，实现了只需对key相同的扩展点进行加载。</p>
+<p>dubbo SPI的目的：获取一个实现类的对象.</p>
+<h3 id="源码构成"><a href="#源码构成" class="headerlink" title="源码构成"></a>源码构成</h3><p>运行dubbo源码先找到入口，也就是主函数，dubbo源码的入口就是Main类</p>
+<h4 id="Main-——主函数"><a href="#Main-——主函数" class="headerlink" title="Main()——主函数"></a>Main()——主函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">package com.alibaba.dubbo.container;</span><br><span class="line">//...</span><br><span class="line">/**</span><br><span class="line"> * Main. (API, Static, ThreadSafe)</span><br><span class="line"> */</span><br><span class="line">public class Main &#123;</span><br><span class="line">//...</span><br><span class="line">private static final ExtensionLoader&lt;Container&gt; loader = ExtensionLoader.getExtensionLoader(Container.class);//由此进入ExtensionLoader类</span><br><span class="line">//...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ExtensionLoader类"><a href="#ExtensionLoader类" class="headerlink" title="ExtensionLoader类"></a>ExtensionLoader类</h4><h5 id="getExtensionLoader-Class-type-——为该接口new一个ExtensionLoader，然后缓存起来"><a href="#getExtensionLoader-Class-type-——为该接口new一个ExtensionLoader，然后缓存起来" class="headerlink" title="getExtensionLoader(Class type) ——为该接口new一个ExtensionLoader，然后缓存起来"></a>getExtensionLoader(Class<t> type) ——为该接口new一个ExtensionLoader，然后缓存起来</t></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static &lt;T&gt; ExtensionLoader&lt;T&gt; getExtensionLoader(Class&lt;T&gt; type) &#123;</span><br><span class="line">    if (type == null)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Extension type == null&quot;);</span><br><span class="line">    if (!type.isInterface()) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;Extension type(&quot; + type + &quot;) is not interface!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (!withExtensionAnnotation(type)) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;Extension type(&quot; + type +</span><br><span class="line">                &quot;) is not extension, because WITHOUT @&quot; + SPI.class.getSimpleName() + &quot; Annotation!&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">	//从缓存中获取ExtensionLoader对象</span><br><span class="line">    ExtensionLoader&lt;T&gt; loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">    //若缓存中没有</span><br><span class="line">    if (loader == null) &#123;</span><br><span class="line">        EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader&lt;T&gt;(type));//创建缓存</span><br><span class="line">        loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);//创建ExtensionFactory对象</span><br><span class="line">    &#125;</span><br><span class="line">    return loader;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">private ExtensionLoader(Class&lt;?&gt; type) &#123;</span><br><span class="line">    this.type = type;</span><br><span class="line">    objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="执行以上代码完成了两个属性的初始化"><a href="#执行以上代码完成了两个属性的初始化" class="headerlink" title="执行以上代码完成了两个属性的初始化"></a>执行以上代码完成了两个属性的初始化</h6><p>1：每一个ExtensionLoader都包含了两个值type和objectFactory</p>
+<p>Class&lt;?&gt; type；//构造器 初始化时要得到的接口名</p>
+<p>ExtensionFactory objectFactory// 构造器 初始化时AdaptiveExtensionFactory[SpiExtensionFactory,SpringExtensionFactory]</p>
+<p>2：new 一个ExtensionLoader 存储在ConcurrentMap&lt;Class&lt;?&gt;, ExtensionLoader&lt;?&gt;&gt; EXTENSION_LOADERS</p>
+<h6 id="关于这个objectFactory的一些细节"><a href="#关于这个objectFactory的一些细节" class="headerlink" title="关于这个objectFactory的一些细节"></a>关于这个objectFactory的一些细节</h6><p>1：objectFactory就是ExtensionFactory，它也是通过    ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension())来实现的，但是它的objectFactory=null</p>
+<p>2：objectFactory的作用：为dubbo的IOC提供所有对象</p>
+<h4 id="Adaptive注解介绍"><a href="#Adaptive注解介绍" class="headerlink" title="@Adaptive注解介绍"></a>@Adaptive注解介绍</h4><p>adaptive注解在类和方法上的区别：</p>
+<p>1：注解在类上：代表人工实现编码，即实现了一个装饰类（设计模式中的装饰模式），例如：ExtensionFactory</p>
+<p>2：注解在方法上：代表自动生成和编译一个动态的adpative类，例如：Protocol$Adaptive</p>
+<h5 id="getAdaptiveExtension-——-获取一个扩展装饰类的对象，这个类有一个规则，如果它没有一个-Adaptive注解，就动态创建一个装饰类，例如Protocol-Adaptive对象"><a href="#getAdaptiveExtension-——-获取一个扩展装饰类的对象，这个类有一个规则，如果它没有一个-Adaptive注解，就动态创建一个装饰类，例如Protocol-Adaptive对象" class="headerlink" title="getAdaptiveExtension()—— 获取一个扩展装饰类的对象，这个类有一个规则，如果它没有一个@Adaptive注解，就动态创建一个装饰类，例如Protocol$Adaptive对象"></a>getAdaptiveExtension()—— 获取一个扩展装饰类的对象，这个类有一个规则，如果它没有一个@Adaptive注解，就动态创建一个装饰类，例如Protocol$Adaptive对象</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public T getAdaptiveExtension() &#123;</span><br><span class="line">    Object instance = cachedAdaptiveInstance.get();</span><br><span class="line">    if (instance == null) &#123;</span><br><span class="line">        if (createAdaptiveInstanceError == null) &#123;</span><br><span class="line">            synchronized (cachedAdaptiveInstance) &#123;</span><br><span class="line">                instance = cachedAdaptiveInstance.get();</span><br><span class="line">                if (instance == null) &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        instance = createAdaptiveExtension();</span><br><span class="line">                        cachedAdaptiveInstance.set(instance);</span><br><span class="line">                    &#125; catch (Throwable t) &#123;</span><br><span class="line">                        createAdaptiveInstanceError = t;</span><br><span class="line">                        throw new IllegalStateException(&quot;fail to create adaptive instance: &quot; + t.toString(), t);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            throw new IllegalStateException(&quot;fail to create adaptive instance: &quot; + createAdaptiveInstanceError.toString(), createAdaptiveInstanceError);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return (T) instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="getExtension-——获取一个对象"><a href="#getExtension-——获取一个对象" class="headerlink" title="getExtension()——获取一个对象"></a>getExtension()——获取一个对象</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public T getExtension(String name) &#123;</span><br><span class="line">    if (name == null || name.length() == 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Extension name == null&quot;);</span><br><span class="line">    if (&quot;true&quot;.equals(name)) &#123;</span><br><span class="line">        return getDefaultExtension();</span><br><span class="line">    &#125;</span><br><span class="line">    Holder&lt;Object&gt; holder = cachedInstances.get(name);</span><br><span class="line">    if (holder == null) &#123;</span><br><span class="line">        cachedInstances.putIfAbsent(name, new Holder&lt;Object&gt;());</span><br><span class="line">        holder = cachedInstances.get(name);</span><br><span class="line">    &#125;</span><br><span class="line">    Object instance = holder.get();</span><br><span class="line">    if (instance == null) &#123;</span><br><span class="line">        synchronized (holder) &#123;</span><br><span class="line">            instance = holder.get();</span><br><span class="line">            if (instance == null) &#123;</span><br><span class="line">                instance = createExtension(name);</span><br><span class="line">                holder.set(instance);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return (T) instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SPI/" rel="tag"># SPI</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/23/GitHub上传本地项目到仓库/" rel="next" title="GitHub上传本地项目到仓库">
+                <i class="fa fa-chevron-left"></i> GitHub上传本地项目到仓库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/cat.jpg"
+                alt="宛亚菁" />
+            
+              <p class="site-author-name" itemprop="name">宛亚菁</p>
+              <p class="site-description motion-element" itemprop="description">生活不止眼前的苟且</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yestermorrow" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#dubbo系列之SPI机制实现"><span class="nav-number">1.</span> <span class="nav-text">dubbo系列之SPI机制实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初识SPI"><span class="nav-number">1.0.1.</span> <span class="nav-text">初识SPI</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SPI设计目标"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">SPI设计目标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dubbo-SPI和-java-SPI的不同之处"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">dubbo SPI和 java SPI的不同之处</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dubbo-SPI-约定"><span class="nav-number">1.0.1.3.</span> <span class="nav-text">dubbo SPI 约定</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码构成"><span class="nav-number">1.0.2.</span> <span class="nav-text">源码构成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Main-——主函数"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">Main()——主函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ExtensionLoader类"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">ExtensionLoader类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#getExtensionLoader-Class-type-——为该接口new一个ExtensionLoader，然后缓存起来"><span class="nav-number">1.0.2.2.1.</span> <span class="nav-text">getExtensionLoader(Class type) ——为该接口new一个ExtensionLoader，然后缓存起来</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#执行以上代码完成了两个属性的初始化"><span class="nav-number">1.0.2.2.1.1.</span> <span class="nav-text">执行以上代码完成了两个属性的初始化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#关于这个objectFactory的一些细节"><span class="nav-number">1.0.2.2.1.2.</span> <span class="nav-text">关于这个objectFactory的一些细节</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Adaptive注解介绍"><span class="nav-number">1.0.2.3.</span> <span class="nav-text">@Adaptive注解介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#getAdaptiveExtension-——-获取一个扩展装饰类的对象，这个类有一个规则，如果它没有一个-Adaptive注解，就动态创建一个装饰类，例如Protocol-Adaptive对象"><span class="nav-number">1.0.2.3.1.</span> <span class="nav-text">getAdaptiveExtension()—— 获取一个扩展装饰类的对象，这个类有一个规则，如果它没有一个@Adaptive注解，就动态创建一个装饰类，例如Protocol$Adaptive对象</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#getExtension-——获取一个对象"><span class="nav-number">1.0.2.3.2.</span> <span class="nav-text">getExtension()——获取一个对象</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        ﻿<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">宛亚菁</span>
+
+  
+</div>
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
