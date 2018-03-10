@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="服务发布 本地暴露," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="dubbo系列之服务发布-流程先上两张经典图，大致了解一下发布流程  源码构成dubbo-demo-provider.xml——注册文件1234567891011121314&amp;lt;!-- 提供方应用信息，用于计算依赖关系 --&amp;gt;&amp;lt;dubbo:application name=&amp;quot;demo-provider&amp;quot;/&amp;gt;&amp;lt;!-- 使用multicast广播注册中心">
+<meta name="keywords" content="服务发布 本地暴露">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dubbo系列之服务发布-流程">
+<meta property="og:url" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/index.html">
+<meta property="og:site_name" content="Yestermorrow">
+<meta property="og:description" content="dubbo系列之服务发布-流程先上两张经典图，大致了解一下发布流程  源码构成dubbo-demo-provider.xml——注册文件1234567891011121314&amp;lt;!-- 提供方应用信息，用于计算依赖关系 --&amp;gt;&amp;lt;dubbo:application name=&amp;quot;demo-provider&amp;quot;/&amp;gt;&amp;lt;!-- 使用multicast广播注册中心">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/官方文档服务发布序列图.png">
+<meta property="og:image" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/发布活动图.png">
+<meta property="og:image" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/服务提供者暴露一个服务的详细过程.jpg">
+<meta property="og:image" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/本地暴露流程图.png">
+<meta property="og:image" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/dubbo服务暴露总结(远程暴露">
+<meta property="og:updated_time" content="2018-03-10T07:45:43.914Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dubbo系列之服务发布-流程">
+<meta name="twitter:description" content="dubbo系列之服务发布-流程先上两张经典图，大致了解一下发布流程  源码构成dubbo-demo-provider.xml——注册文件1234567891011121314&amp;lt;!-- 提供方应用信息，用于计算依赖关系 --&amp;gt;&amp;lt;dubbo:application name=&amp;quot;demo-provider&amp;quot;/&amp;gt;&amp;lt;!-- 使用multicast广播注册中心">
+<meta name="twitter:image" content="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/官方文档服务发布序列图.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/"/>
+
+
+
+
+
+  <title>dubbo系列之服务发布-流程 | Yestermorrow</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yestermorrow</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/08/dubbo系列之服务发布-流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宛亚菁">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/cat.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yestermorrow">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dubbo系列之服务发布-流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-08T14:06:57+08:00">
+                2018-03-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="dubbo系列之服务发布-流程"><a href="#dubbo系列之服务发布-流程" class="headerlink" title="dubbo系列之服务发布-流程"></a>dubbo系列之服务发布-流程</h1><p>先上两张经典图，大致了解一下发布流程<img src="/2018/03/08/dubbo系列之服务发布-流程/官方文档服务发布序列图.png" alt="官方文档服务发布序列图"></p>
+<p><img src="/2018/03/08/dubbo系列之服务发布-流程/发布活动图.png" alt="发布活动图"></p>
+<h3 id="源码构成"><a href="#源码构成" class="headerlink" title="源码构成"></a>源码构成</h3><h5 id="dubbo-demo-provider-xml——注册文件"><a href="#dubbo-demo-provider-xml——注册文件" class="headerlink" title="dubbo-demo-provider.xml——注册文件"></a>dubbo-demo-provider.xml——注册文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 提供方应用信息，用于计算依赖关系 --&gt;</span><br><span class="line">&lt;dubbo:application name=&quot;demo-provider&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 使用multicast广播注册中心暴露服务地址 --&gt;</span><br><span class="line">&lt;dubbo:registry address=&quot;multicast://224.5.6.7:1234&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 用dubbo协议在20880端口暴露服务 --&gt;</span><br><span class="line">&lt;dubbo:protocol name=&quot;dubbo&quot; port=&quot;20880&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 声明需要暴露的服务接口 --&gt;</span><br><span class="line">&lt;bean id=&quot;demoService&quot; class=&quot;com.alibaba.dubbo.demo.provider.DemoServiceImpl&quot;/&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 和本地bean一样实现服务 --&gt;</span><br><span class="line">&lt;dubbo:service interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; ref=&quot;demoService&quot;/&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到服务是通过dubbo的schema service进行注入的，那我们找到DubboNameSpaceHandler文件，即dubbo的命名空间处理器，找到<dubbo:service>标签解析行。</dubbo:service></p>
+<h5 id="DubboNameSpaceHandler"><a href="#DubboNameSpaceHandler" class="headerlink" title="DubboNameSpaceHandler()"></a>DubboNameSpaceHandler()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public class DubboNamespaceHandler extends NamespaceHandlerSupport &#123;</span><br><span class="line">    public void init() &#123;</span><br><span class="line">		//省略一些其他加载语句</span><br><span class="line">        //这就话就是用于加载服务</span><br><span class="line">        registerBeanDefinitionParser(&quot;service&quot;, new DubboBeanDefinitionParser(ServiceBean.class, true));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ServiceBean"><a href="#ServiceBean" class="headerlink" title="ServiceBean()"></a>ServiceBean()</h5><p>ServiceBean类可以看到实现了<strong>ApplicationListener</strong>，这个接口就是spring的时间机制，看看ServiceBean继承这个接口实现的方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public void onApplicationEvent(ApplicationEvent event) &#123;</span><br><span class="line">    if (ContextRefreshedEvent.class.getName().equals(event.getClass().getName())) &#123;</span><br><span class="line">        if (isDelay() &amp;&amp; !isExported() &amp;&amp; !isUnexported()) &#123;</span><br><span class="line">            if (logger.isInfoEnabled()) &#123;</span><br><span class="line">                logger.info(&quot;The service ready on spring started. service: &quot; + getInterface());</span><br><span class="line">            &#125;</span><br><span class="line">            export();//服务暴露的开始</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>export()</p>
+<p>  –&gt;ServiceConfig.export()</p>
+<p>​    –&gt;doExport()</p>
+<p>​      –&gt;doExportUrls()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private void doExportUrls() &#123;</span><br><span class="line">    //加载注册中心，从dubbo.properties里面组装registry的url信息</span><br><span class="line">    List&lt;URL&gt; registryURLs = loadRegistries(true);</span><br><span class="line">    for (ProtocolConfig protocolConfig : protocols) &#123;//for循环，代表了一个服务可以有多个通信协议，例如 tcp协议 http协议，默认是tcp协议</span><br><span class="line">        doExportUrlsFor1Protocol(protocolConfig, registryURLs);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>doExportUrlsFor1Protocol()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List&lt;URL&gt; registryURLs) &#123;</span><br><span class="line">//省略一段代码</span><br><span class="line">//配置为none不暴露</span><br><span class="line">        if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) &#123;</span><br><span class="line">            //配置不是remote的情况下做本地暴露 (配置为remote，则表示只暴露远程服务)</span><br><span class="line">            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) &#123;</span><br><span class="line">                exportLocal(url);</span><br><span class="line">            &#125;</span><br><span class="line">            //如果配置不是local则暴露为远程服务.(配置为local，则表示只暴露本地服务)</span><br><span class="line">            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) &#123;</span><br><span class="line">                if (logger.isInfoEnabled()) &#123;</span><br><span class="line">                    logger.info(&quot;Export dubbo service &quot; + interfaceClass.getName() + &quot; to url &quot; + url);</span><br><span class="line">                &#125;</span><br><span class="line">                if (registryURLs != null &amp;&amp; registryURLs.size() &gt; 0</span><br><span class="line">                        &amp;&amp; url.getParameter(&quot;register&quot;, true)) &#123;</span><br><span class="line">                    for (URL registryURL : registryURLs) &#123;</span><br><span class="line">                        url = url.addParameterIfAbsent(&quot;dynamic&quot;, registryURL.getParameter(&quot;dynamic&quot;));</span><br><span class="line">                        URL monitorUrl = loadMonitor(registryURL);</span><br><span class="line">                        if (monitorUrl != null) &#123;</span><br><span class="line">                            url = url.addParameterAndEncoded(Constants.MONITOR_KEY, monitorUrl.toFullString());</span><br><span class="line">                        &#125;</span><br><span class="line">                        if (logger.isInfoEnabled()) &#123;</span><br><span class="line">                            logger.info(&quot;Register dubbo service &quot; + interfaceClass.getName() + &quot; url &quot; + url + &quot; to registry &quot; + registryURL);</span><br><span class="line">                        &#125;</span><br><span class="line">                        Invoker&lt;?&gt; invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));</span><br><span class="line"></span><br><span class="line">                        Exporter&lt;?&gt; exporter = protocol.export(invoker);</span><br><span class="line">                        exporters.add(exporter);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    Invoker&lt;?&gt; invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);</span><br><span class="line"></span><br><span class="line">                    Exporter&lt;?&gt; exporter = protocol.export(invoker);</span><br><span class="line">                    exporters.add(exporter);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        this.urls.add(url);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="暴露本地服务和暴露远程服务的区别是什么？"><a href="#暴露本地服务和暴露远程服务的区别是什么？" class="headerlink" title="暴露本地服务和暴露远程服务的区别是什么？"></a>暴露本地服务和暴露远程服务的区别是什么？</h6><p>1.暴露本地服务：指暴露在用一个JVM里面，不用通过调用zk来进行远程通信。例如：在同一个服务，自己调用自己的接口，就没必要进行网络IP连接来通信。<br>2.暴露远程服务：指暴露给远程客户端的IP和端口号，通过网络来实现通信。</p>
+<h4 id="本地暴露"><a href="#本地暴露" class="headerlink" title="本地暴露"></a>本地暴露</h4><h5 id="exportLocal-url"><a href="#exportLocal-url" class="headerlink" title="exportLocal(url)"></a>exportLocal(url)</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@SuppressWarnings(&#123;&quot;unchecked&quot;, &quot;rawtypes&quot;&#125;)</span><br><span class="line">private void exportLocal(URL url) &#123;</span><br><span class="line">    if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) &#123;</span><br><span class="line">        URL local = URL.valueOf(url.toFullString())</span><br><span class="line">                .setProtocol(Constants.LOCAL_PROTOCOL)</span><br><span class="line">                .setHost(NetUtils.LOCALHOST)</span><br><span class="line">                .setPort(0);</span><br><span class="line">        Exporter&lt;?&gt; exporter = protocol.export(</span><br><span class="line">        		//创建代理类</span><br><span class="line">                proxyFactory.getInvoker(ref, (Class) interfaceClass, local));</span><br><span class="line">        exporters.add(exporter);</span><br><span class="line">        logger.info(&quot;Export dubbo service &quot; + interfaceClass.getName() + &quot; to local registry&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>Exporter&lt;?&gt; exporter = protocol.export(
+    //创建代理类
+    proxyFactory.getInvoker(ref, (Class) interfaceClass, local));接下来的代码流程就用一张图代替了，很清晰
+</code></pre><p>这句话是本地暴露的关键，看官方给的服务提供者暴露一个服务的详细过程，其实也就是这句代码</p>
+<p><img src="/2018/03/08/dubbo系列之服务发布-流程/服务提供者暴露一个服务的详细过程.jpg" alt="服务提供者暴露一个服务的详细过程"></p>
+<h4 id="为了方便理解，介绍一下一些类和方法的概念："><a href="#为了方便理解，介绍一下一些类和方法的概念：" class="headerlink" title="为了方便理解，介绍一下一些类和方法的概念："></a>为了方便理解，介绍一下一些类和方法的概念：</h4><h5 id="proxyFactory"><a href="#proxyFactory" class="headerlink" title="proxyFactory"></a>proxyFactory</h5><p>proxyFactory:就是为了获取一个接口的代理类，例如获取一个远程接口的代理。<br>它有2个方法，代表2个作用<br>  a.getInvoker:针对server端，将服务对象，如DemoServiceImpl包装成一个Invoker对象。<br>  b.getProxy  :针对client端，创建接口的代理对象，例如DemoService的接口。</p>
+<h5 id="Wrapper"><a href="#Wrapper" class="headerlink" title="Wrapper"></a>Wrapper</h5><p>它类似spring的BeanWrapper,它就是包装了一个接口或一个类，可以通过wrapper对实例对象进行赋值 取值以及指定方法的调用。</p>
+<h5 id="Invoker"><a href="#Invoker" class="headerlink" title="Invoker"></a>Invoker</h5><p>它是一个可执行的对象，能够根据方法的名称、参数得到相应的执行结果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">它里面有一个很重要的方法 Result invoke(Invocation invocation);</span><br></pre></td></tr></table></figure>
+<h5 id="Invocation"><a href="#Invocation" class="headerlink" title="Invocation"></a>Invocation</h5><p>包含了需要执行的方法和参数等重要信息，目前它只有2个实现类RpcInvocation MockInvocation</p>
+<p> 它有3种类型的Invoker<br>1.本地执行类的Invoker</p>
+<pre><code>server端：要执行 demoService.sayHello，就通过InjvmExporter来进行反射执行demoService.sayHello就可以了。
+</code></pre><p>2.远程通信类的Invoker<br>    client端：要执行 demoService.sayHello，它封装了DubboInvoker进行远程通信，发送要执行的接口给server端。<br>    server端：采用了AbstractProxyInvoker执行了DemoServiceImpl.sayHello,然后将执行结果返回发送给client.</p>
+<p>3.多个远程通信执行类的Invoker聚合成集群版的Invoker<br>    client端：要执行 demoService.sayHello，就要通过AbstractClusterInvoker来进行负载均衡，DubboInvoker进行远程通信，发送要执行的接口给server端。<br>    server端：采用了AbstractProxyInvoker执行了DemoServiceImpl.sayHello,然后将执行结果返回发送给client.</p>
+<h5 id="Protocol"><a href="#Protocol" class="headerlink" title="Protocol"></a>Protocol</h5><p>  1.export：暴露远程服务（用于服务端），就是将proxyFactory.getInvoker创建的代理类 invoker对象，通过协议暴露给外部。<br>  2.refer：引用远程服务（用于客户端）, 通过proxyFactory.getProxy来创建远程的动态代理类，例如DemoService的远程动态接口。</p>
+<h5 id="exporter"><a href="#exporter" class="headerlink" title="exporter"></a>exporter</h5><p>维护invoder的生命周期。</p>
+<h5 id="exchanger"><a href="#exchanger" class="headerlink" title="exchanger"></a>exchanger</h5><p>信息交换层，封装请求响应模式，同步转异步。</p>
+<h5 id="transporter"><a href="#transporter" class="headerlink" title="transporter"></a>transporter</h5><p>网络传输层，用来抽象netty和mina的统一接口。</p>
+<h5 id="Directory"><a href="#Directory" class="headerlink" title="Directory"></a>Directory</h5><p>目录服务<br>  StaticDirectory：静态目录服务，他的Invoker是固定的。<br>  RegistryDirectory：注册目录服务，他的Invoker集合数据来源于zk注册中心的，他实现了NotifyListener接口，并且实现回调notify(List<url> urls),</url></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">整个过程有一个重要的map变量，methodInvokerMap（它是数据的来源；同时也是notify的重要操作对象，重点是写操作。）</span><br></pre></td></tr></table></figure>
+<p>介绍完上面一些概念，接着看看本地暴露接下来的步骤，用一张清晰的图表示。</p>
+<p><img src="/2018/03/08/dubbo系列之服务发布-流程/本地暴露流程图.png" alt="本地暴露流程图"></p>
+<p>最终<strong>本地暴露的目的</strong>就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exporterMap.put(key, this)//key=com.alibaba.dubbo.demo.DemoService, this=InjvmExporter</span><br></pre></td></tr></table></figure>
+<h4 id="远程暴露"><a href="#远程暴露" class="headerlink" title="远程暴露"></a>远程暴露</h4><h5 id="doExportUrlsFor1Protocol"><a href="#doExportUrlsFor1Protocol" class="headerlink" title="doExportUrlsFor1Protocol()"></a>doExportUrlsFor1Protocol()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//原理和本地暴露一样都是为了获取一个Invoker对象</span><br><span class="line">Invoker&lt;?&gt; invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));</span><br><span class="line">//远程暴露的关键</span><br><span class="line">Exporter&lt;?&gt; exporter = protocol.export(invoker);</span><br><span class="line">exporters.add(exporter);</span><br></pre></td></tr></table></figure>
+<p>远程暴露的关键就是invoker转换导exporter的过程,还是贴一张图</p>
+<p><img src="/2018/03/08/dubbo系列之服务发布-流程/dubbo服务暴露总结(远程暴露" alt="">.png)</p>
+<p>DubboProtocol()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public &lt;T&gt; Exporter&lt;T&gt; export(Invoker&lt;T&gt; invoker) throws RpcException &#123;</span><br><span class="line">    URL url = invoker.getUrl();</span><br><span class="line"></span><br><span class="line">    // export service.</span><br><span class="line">    //组装key=com.alibaba.dubbo.demo.DemoService:20880</span><br><span class="line">    String key = serviceKey(url);</span><br><span class="line">    DubboExporter&lt;T&gt; exporter = new DubboExporter&lt;T&gt;(invoker, key, exporterMap);</span><br><span class="line">    //目的：exporterMap.put(key, this)//key=com.alibaba.dubbo.demo.DemoService:20880, this=DubboExporter</span><br><span class="line">    exporterMap.put(key, exporter);</span><br><span class="line"></span><br><span class="line">    //export an stub service for dispaching event</span><br><span class="line">    Boolean isStubSupportEvent = url.getParameter(Constants.STUB_EVENT_KEY, Constants.DEFAULT_STUB_EVENT);</span><br><span class="line">    Boolean isCallbackservice = url.getParameter(Constants.IS_CALLBACK_SERVICE, false);</span><br><span class="line">    if (isStubSupportEvent &amp;&amp; !isCallbackservice) &#123;</span><br><span class="line">        String stubServiceMethods = url.getParameter(Constants.STUB_EVENT_METHODS_KEY);</span><br><span class="line">        if (stubServiceMethods == null || stubServiceMethods.length() == 0) &#123;</span><br><span class="line">            if (logger.isWarnEnabled()) &#123;</span><br><span class="line">                logger.warn(new IllegalStateException(&quot;consumer [&quot; + url.getParameter(Constants.INTERFACE_KEY) +</span><br><span class="line">                        &quot;], has set stubproxy support event ,but no stub methods founded.&quot;));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            stubServiceMethodsMap.put(url.getServiceKey(), stubServiceMethods);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    openServer(url);</span><br><span class="line">	//返回exporter</span><br><span class="line">    return exporter;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考链接 </p>
+<p>[]: <a href="https://www.jianshu.com/p/893f7e6e0c58" target="_blank" rel="noopener">https://www.jianshu.com/p/893f7e6e0c58</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/服务发布-本地暴露/" rel="tag"># 服务发布 本地暴露</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/03/dubbo系列之服务发布-原理/" rel="next" title="dubbo系列之服务发布-原理">
+                <i class="fa fa-chevron-left"></i> dubbo系列之服务发布-原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/10/dubbo系列之服务发布-netty的服务暴露/" rel="prev" title="dubbo系列之服务发布-netty的服务暴露">
+                dubbo系列之服务发布-netty的服务暴露 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/cat.jpg"
+                alt="宛亚菁" />
+            
+              <p class="site-author-name" itemprop="name">宛亚菁</p>
+              <p class="site-description motion-element" itemprop="description">生活不止眼前的苟且</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yestermorrow" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#dubbo系列之服务发布-流程"><span class="nav-number">1.</span> <span class="nav-text">dubbo系列之服务发布-流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#源码构成"><span class="nav-number">1.0.1.</span> <span class="nav-text">源码构成</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#dubbo-demo-provider-xml——注册文件"><span class="nav-number">1.0.1.0.1.</span> <span class="nav-text">dubbo-demo-provider.xml——注册文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DubboNameSpaceHandler"><span class="nav-number">1.0.1.0.2.</span> <span class="nav-text">DubboNameSpaceHandler()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ServiceBean"><span class="nav-number">1.0.1.0.3.</span> <span class="nav-text">ServiceBean()</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#暴露本地服务和暴露远程服务的区别是什么？"><span class="nav-number">1.0.1.0.3.1.</span> <span class="nav-text">暴露本地服务和暴露远程服务的区别是什么？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#本地暴露"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">本地暴露</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#exportLocal-url"><span class="nav-number">1.0.1.1.1.</span> <span class="nav-text">exportLocal(url)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为了方便理解，介绍一下一些类和方法的概念："><span class="nav-number">1.0.1.2.</span> <span class="nav-text">为了方便理解，介绍一下一些类和方法的概念：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#proxyFactory"><span class="nav-number">1.0.1.2.1.</span> <span class="nav-text">proxyFactory</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Wrapper"><span class="nav-number">1.0.1.2.2.</span> <span class="nav-text">Wrapper</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Invoker"><span class="nav-number">1.0.1.2.3.</span> <span class="nav-text">Invoker</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Invocation"><span class="nav-number">1.0.1.2.4.</span> <span class="nav-text">Invocation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Protocol"><span class="nav-number">1.0.1.2.5.</span> <span class="nav-text">Protocol</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#exporter"><span class="nav-number">1.0.1.2.6.</span> <span class="nav-text">exporter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#exchanger"><span class="nav-number">1.0.1.2.7.</span> <span class="nav-text">exchanger</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#transporter"><span class="nav-number">1.0.1.2.8.</span> <span class="nav-text">transporter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Directory"><span class="nav-number">1.0.1.2.9.</span> <span class="nav-text">Directory</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#远程暴露"><span class="nav-number">1.0.1.3.</span> <span class="nav-text">远程暴露</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#doExportUrlsFor1Protocol"><span class="nav-number">1.0.1.3.1.</span> <span class="nav-text">doExportUrlsFor1Protocol()</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        ﻿<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">宛亚菁</span>
+
+  
+</div>
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
