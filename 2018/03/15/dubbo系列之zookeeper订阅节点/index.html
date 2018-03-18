@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="dubbo zookeeper," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="dubbo系列之zookeeper订阅节点源码构成RegistryProtocol类1registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);//订阅节点 FailbackRegistry类subscribe()——向服务端发送订阅请求，及异常情况进行订阅重试123456789101112131415161718192">
+<meta name="keywords" content="dubbo zookeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dubbo系列之zookeeper订阅节点">
+<meta property="og:url" content="http://yoursite.com/2018/03/15/dubbo系列之zookeeper订阅节点/index.html">
+<meta property="og:site_name" content="Yestermorrow">
+<meta property="og:description" content="dubbo系列之zookeeper订阅节点源码构成RegistryProtocol类1registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);//订阅节点 FailbackRegistry类subscribe()——向服务端发送订阅请求，及异常情况进行订阅重试123456789101112131415161718192">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/03/15/dubbo系列之zookeeper订阅节点/blog/source/_posts/dubbo系列之zookeeper订阅节点/zookeeper订阅节点流程图.png">
+<meta property="og:updated_time" content="2018-03-15T13:02:38.609Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dubbo系列之zookeeper订阅节点">
+<meta name="twitter:description" content="dubbo系列之zookeeper订阅节点源码构成RegistryProtocol类1registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);//订阅节点 FailbackRegistry类subscribe()——向服务端发送订阅请求，及异常情况进行订阅重试123456789101112131415161718192">
+<meta name="twitter:image" content="http://yoursite.com/2018/03/15/dubbo系列之zookeeper订阅节点/blog/source/_posts/dubbo系列之zookeeper订阅节点/zookeeper订阅节点流程图.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/15/dubbo系列之zookeeper订阅节点/"/>
+
+
+
+
+
+  <title>dubbo系列之zookeeper订阅节点 | Yestermorrow</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yestermorrow</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/15/dubbo系列之zookeeper订阅节点/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宛亚菁">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/cat.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yestermorrow">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dubbo系列之zookeeper订阅节点</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-15T20:51:48+08:00">
+                2018-03-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="dubbo系列之zookeeper订阅节点"><a href="#dubbo系列之zookeeper订阅节点" class="headerlink" title="dubbo系列之zookeeper订阅节点"></a>dubbo系列之zookeeper订阅节点</h1><h3 id="源码构成"><a href="#源码构成" class="headerlink" title="源码构成"></a>源码构成</h3><h4 id="RegistryProtocol类"><a href="#RegistryProtocol类" class="headerlink" title="RegistryProtocol类"></a>RegistryProtocol类</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);//订阅节点</span><br></pre></td></tr></table></figure>
+<h4 id="FailbackRegistry类"><a href="#FailbackRegistry类" class="headerlink" title="FailbackRegistry类"></a>FailbackRegistry类</h4><h5 id="subscribe-——向服务端发送订阅请求，及异常情况进行订阅重试"><a href="#subscribe-——向服务端发送订阅请求，及异常情况进行订阅重试" class="headerlink" title="subscribe()——向服务端发送订阅请求，及异常情况进行订阅重试"></a>subscribe()——向服务端发送订阅请求，及异常情况进行订阅重试</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">public void subscribe(URL url, NotifyListener listener) &#123;</span><br><span class="line">    if (destroyed.get())&#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    super.subscribe(url, listener);</span><br><span class="line">    removeFailedSubscribed(url, listener);</span><br><span class="line">    try &#123;</span><br><span class="line">        // 向服务器端发送订阅请求</span><br><span class="line">        doSubscribe(url, listener);</span><br><span class="line">    &#125; catch (Exception e) &#123;</span><br><span class="line">        Throwable t = e;</span><br><span class="line"></span><br><span class="line">        List&lt;URL&gt; urls = getCacheUrls(url);</span><br><span class="line">        if (urls != null &amp;&amp; urls.size() &gt; 0) &#123;</span><br><span class="line">            notify(url, listener, urls);</span><br><span class="line">            logger.error(&quot;Failed to subscribe &quot; + url + &quot;, Using cached list: &quot; + urls + &quot; from cache file: &quot; + getUrl().getParameter(Constants.FILE_KEY, System.getProperty(&quot;user.home&quot;) + &quot;/dubbo-registry-&quot; + url.getHost() + &quot;.cache&quot;) + &quot;, cause: &quot; + t.getMessage(), t);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 如果开启了启动时检测，则直接抛出异常</span><br><span class="line">            boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)</span><br><span class="line">                    &amp;&amp; url.getParameter(Constants.CHECK_KEY, true);</span><br><span class="line">            boolean skipFailback = t instanceof SkipFailbackWrapperException;</span><br><span class="line">            if (check || skipFailback) &#123;</span><br><span class="line">                if (skipFailback) &#123;</span><br><span class="line">                    t = t.getCause();</span><br><span class="line">                &#125;</span><br><span class="line">                throw new IllegalStateException(&quot;Failed to subscribe &quot; + url + &quot;, cause: &quot; + t.getMessage(), t);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                logger.error(&quot;Failed to subscribe &quot; + url + &quot;, waiting for retry, cause: &quot; + t.getMessage(), t);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        // 将失败的订阅请求记录到失败列表，定时重试</span><br><span class="line">        addFailedSubscribed(url, listener);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ZookeeperRegistry类"><a href="#ZookeeperRegistry类" class="headerlink" title="ZookeeperRegistry类"></a>ZookeeperRegistry类</h4><h5 id="doSubscribe（）"><a href="#doSubscribe（）" class="headerlink" title="doSubscribe（）"></a>doSubscribe（）</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">else &#123;</span><br><span class="line">    List&lt;URL&gt; urls = new ArrayList&lt;URL&gt;();</span><br><span class="line">    for (String path : toCategoriesPath(url)) &#123;</span><br><span class="line">        ConcurrentMap&lt;NotifyListener, ChildListener&gt; listeners = zkListeners.get(url);</span><br><span class="line">        if (listeners == null) &#123;</span><br><span class="line">            zkListeners.putIfAbsent(url, new ConcurrentHashMap&lt;NotifyListener, ChildListener&gt;());</span><br><span class="line">            listeners = zkListeners.get(url);</span><br><span class="line">        &#125;</span><br><span class="line">        ChildListener zkListener = listeners.get(listener);</span><br><span class="line">        if (zkListener == null) &#123;</span><br><span class="line">            listeners.putIfAbsent(listener, new ChildListener() &#123;//创建一个监听集合</span><br><span class="line">                public void childChanged(String parentPath, List&lt;String&gt; currentChilds) &#123;</span><br><span class="line">                    ZookeeperRegistry.this.notify(url, listener, toUrlsWithEmpty(url, parentPath, currentChilds));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            zkListener = listeners.get(listener);</span><br><span class="line">        &#125;</span><br><span class="line">        zkClient.create(path, false);//创建一个持久化节点</span><br><span class="line">        List&lt;String&gt; children = zkClient.addChildListener(path, zkListener);//为该节点设置监听</span><br><span class="line">        if (children != null) &#123;</span><br><span class="line">            urls.addAll(toUrlsWithEmpty(url, path, children));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="List-children-zkClient-addChildListener-path-zkListener-为该节点设置监听"><a href="#List-children-zkClient-addChildListener-path-zkListener-为该节点设置监听" class="headerlink" title="List children = zkClient.addChildListener(path, zkListener);//为该节点设置监听"></a>List<string> children = zkClient.addChildListener(path, zkListener);//为该节点设置监听</string></h5><p>–&gt;AbstractZookeeperClient.addChildListener</p>
+<p>​       –&gt;createTargetChildListener(path, listener)//收到订阅后的处理，交给FailbackRegistry.notify处理<br>​            –&gt;ZkclientZookeeperClient.createTargetChildListener<br>​                  –&gt;new IZkChildListener()<br>​                         –&gt;实现了 handleChildChange //收到订阅后的处理<br>​                             –&gt;listener.childChanged(parentPath, currentChilds)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public IZkChildListener createTargetChildListener(String path, final ChildListener listener) &#123;</span><br><span class="line">    return new IZkChildListener() &#123;</span><br><span class="line">        //收到订阅后的处理</span><br><span class="line">        public void handleChildChange(String parentPath, List&lt;String&gt; currentChilds)</span><br><span class="line">                throws Exception &#123;</span><br><span class="line">            listener.childChanged(parentPath, currentChilds);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>–&gt;AbstractZookeeperClient.addChildListener</p>
+<p>​    –&gt;addTargetChildListener(path, targetListener);</p>
+<p>——启动加入订阅/dubbo/com.alibaba.dubbo.demo.DemoService/configurators</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public List&lt;String&gt; addTargetChildListener(String path, final IZkChildListener listener) &#123;</span><br><span class="line">    return client.subscribeChildChanges(path, listener);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="FailbackRegistry-notify"><a href="#FailbackRegistry-notify" class="headerlink" title="FailbackRegistry.notify"></a>FailbackRegistry.notify</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">protected void notify(URL url, NotifyListener listener, List&lt;URL&gt; urls) &#123;</span><br><span class="line">    if (url == null) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;notify url == null&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (listener == null) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;notify listener == null&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    try &#123;</span><br><span class="line">        doNotify(url, listener, urls);</span><br><span class="line">    &#125; catch (Exception t) &#123;</span><br><span class="line">        // 将失败的通知请求记录到失败列表，定时重试</span><br><span class="line">        Map&lt;NotifyListener, List&lt;URL&gt;&gt; listeners = failedNotified.get(url);</span><br><span class="line">        if (listeners == null) &#123;</span><br><span class="line">            failedNotified.putIfAbsent(url, new ConcurrentHashMap&lt;NotifyListener, List&lt;URL&gt;&gt;());</span><br><span class="line">            listeners = failedNotified.get(url);</span><br><span class="line">        &#125;</span><br><span class="line">        listeners.put(listener, urls);</span><br><span class="line">        logger.error(&quot;Failed to notify for subscribe &quot; + url + &quot;, waiting for retry, cause: &quot; + t.getMessage(), t);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="doNotify-url-listener-urls"><a href="#doNotify-url-listener-urls" class="headerlink" title="doNotify(url, listener, urls);"></a>doNotify(url, listener, urls);</h5><p>​       –&gt;AbstractRegistry.notify<br>​            –&gt;saveProperties(url);——将服务端的注册信息更新到本地缓存文件中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">private void saveProperties(URL url) &#123;</span><br><span class="line">    if (file == null) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        StringBuilder buf = new StringBuilder();</span><br><span class="line">        Map&lt;String, List&lt;URL&gt;&gt; categoryNotified = notified.get(url);</span><br><span class="line">        if (categoryNotified != null) &#123;</span><br><span class="line">            for (List&lt;URL&gt; us : categoryNotified.values()) &#123;</span><br><span class="line">                for (URL u : us) &#123;</span><br><span class="line">                    if (buf.length() &gt; 0) &#123;</span><br><span class="line">                        buf.append(URL_SEPARATOR);</span><br><span class="line">                    &#125;</span><br><span class="line">                    buf.append(u.toFullString());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        properties.setProperty(url.getServiceKey(), buf.toString());</span><br><span class="line">        long version = lastCacheChanged.incrementAndGet();</span><br><span class="line">        if (syncSaveFile) &#123;</span><br><span class="line">            doSaveProperties(version);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            //采用线程池来处理</span><br><span class="line">            registryCacheExecutor.execute(new SaveProperties(version));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; catch (Throwable t) &#123;</span><br><span class="line">        logger.warn(t.getMessage(), t);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>进入线程池看一看</p>
+<h4 id="AbstractRegistry类"><a href="#AbstractRegistry类" class="headerlink" title="AbstractRegistry类"></a>AbstractRegistry类</h4><h5 id="doSaveProperties"><a href="#doSaveProperties" class="headerlink" title="doSaveProperties()"></a>doSaveProperties()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    newProperties.putAll(properties);</span><br><span class="line">    File lockfile = new File(file.getAbsolutePath() + &quot;.lock&quot;);</span><br><span class="line">    if (!lockfile.exists()) &#123;</span><br><span class="line">        lockfile.createNewFile();</span><br><span class="line">    &#125;</span><br><span class="line">    RandomAccessFile raf = new RandomAccessFile(lockfile, &quot;rw&quot;);</span><br><span class="line">    try &#123;</span><br><span class="line">        FileChannel channel = raf.getChannel();</span><br><span class="line">        try &#123;</span><br><span class="line">        	// 加锁</span><br><span class="line">            FileLock lock = channel.tryLock();</span><br><span class="line">            if (lock == null) &#123;</span><br><span class="line">                throw new IOException(&quot;Can not lock the registry cache file &quot; + file.getAbsolutePath() + &quot;, ignore and retry later, maybe multi java process use the file, please config: dubbo.registry.file=xxx.properties&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">            // 保存</span><br><span class="line">            try &#123;</span><br><span class="line">                if (!file.exists()) &#123;</span><br><span class="line">                    file.createNewFile();</span><br><span class="line">                &#125;</span><br><span class="line">                FileOutputStream outputFile = new FileOutputStream(file);</span><br><span class="line">                try &#123;</span><br><span class="line">                    newProperties.store(outputFile, &quot;Dubbo Registry Cache&quot;);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    outputFile.close();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                lock.release();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            channel.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        raf.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>配置文件更新完之后</p>
+<h4 id="RegistryProtocol类-1"><a href="#RegistryProtocol类-1" class="headerlink" title="RegistryProtocol类"></a>RegistryProtocol类</h4><p>—-&gt;OverrideListener</p>
+<p>​    —-&gt;notify()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">public void notify(List&lt;URL&gt; urls) &#123;</span><br><span class="line">    List&lt;URL&gt; result = null;</span><br><span class="line">    for (URL url : urls) &#123;</span><br><span class="line">        URL overrideUrl = url;</span><br><span class="line">        if (url.getParameter(Constants.CATEGORY_KEY) == null</span><br><span class="line">                &amp;&amp; Constants.OVERRIDE_PROTOCOL.equals(url.getProtocol())) &#123;</span><br><span class="line">            // 兼容旧版本</span><br><span class="line">            overrideUrl = url.addParameter(Constants.CATEGORY_KEY, Constants.CONFIGURATORS_CATEGORY);</span><br><span class="line">        &#125;</span><br><span class="line">        if (!UrlUtils.isMatch(subscribeUrl, overrideUrl)) &#123;</span><br><span class="line">            if (result == null) &#123;</span><br><span class="line">                result = new ArrayList&lt;URL&gt;(urls);</span><br><span class="line">            &#125;</span><br><span class="line">            result.remove(url);</span><br><span class="line">            logger.warn(&quot;Subsribe category=configurator, but notifed non-configurator urls. may be registry bug. unexcepted url: &quot; + url);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if (result != null) &#123;</span><br><span class="line">        urls = result;</span><br><span class="line">    &#125;</span><br><span class="line">    this.configurators = RegistryDirectory.toConfigurators(urls);</span><br><span class="line">    List&lt;ExporterChangeableWrapper&lt;?&gt;&gt; exporters = new ArrayList&lt;ExporterChangeableWrapper&lt;?&gt;&gt;(bounds.values());</span><br><span class="line">    for (ExporterChangeableWrapper&lt;?&gt; exporter : exporters) &#123;</span><br><span class="line">        Invoker&lt;?&gt; invoker = exporter.getOriginInvoker();</span><br><span class="line">        final Invoker&lt;?&gt; originInvoker;</span><br><span class="line">        if (invoker instanceof InvokerDelegete) &#123;</span><br><span class="line">            originInvoker = ((InvokerDelegete&lt;?&gt;) invoker).getInvoker();</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            originInvoker = invoker;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        URL originUrl = RegistryProtocol.this.getProviderUrl(originInvoker);</span><br><span class="line">        //增加判断：只有 当前服务与override指定服务 匹配时，override才生效</span><br><span class="line">        if (urls != null &amp;&amp; urls.size() &gt; 0 &amp;&amp; originUrl.getServiceKey().equals(urls.get(0).getServiceKey())) &#123;</span><br><span class="line">            URL newUrl = getNewInvokerUrl(originUrl, urls);</span><br><span class="line"></span><br><span class="line">            if (!originUrl.equals(newUrl) || (this.configurators == null || this.configurators.size() == 0)) &#123;</span><br><span class="line">                RegistryProtocol.this.doChangeLocalExport(originInvoker, newUrl);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对比新旧的信息是否有变化,有则重新暴露服务.</p>
+<p>最后来一张zookeeper订阅节点流程图，看完就更清晰了</p>
+<p><img src="/2018/03/15/dubbo系列之zookeeper订阅节点/blog\source\_posts\dubbo系列之zookeeper订阅节点\zookeeper订阅节点流程图.png" alt="zookeeper订阅节点流程图"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/dubbo-zookeeper/" rel="tag"># dubbo zookeeper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/12/dubbo系列之zookeeper创建节点/" rel="next" title="dubbo系列之zookeeper创建节点">
+                <i class="fa fa-chevron-left"></i> dubbo系列之zookeeper创建节点
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/cat.jpg"
+                alt="宛亚菁" />
+            
+              <p class="site-author-name" itemprop="name">宛亚菁</p>
+              <p class="site-description motion-element" itemprop="description">生活不止眼前的苟且</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yestermorrow" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#dubbo系列之zookeeper订阅节点"><span class="nav-number">1.</span> <span class="nav-text">dubbo系列之zookeeper订阅节点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#源码构成"><span class="nav-number">1.0.1.</span> <span class="nav-text">源码构成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RegistryProtocol类"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">RegistryProtocol类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FailbackRegistry类"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">FailbackRegistry类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#subscribe-——向服务端发送订阅请求，及异常情况进行订阅重试"><span class="nav-number">1.0.1.2.1.</span> <span class="nav-text">subscribe()——向服务端发送订阅请求，及异常情况进行订阅重试</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ZookeeperRegistry类"><span class="nav-number">1.0.1.3.</span> <span class="nav-text">ZookeeperRegistry类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#doSubscribe（）"><span class="nav-number">1.0.1.3.1.</span> <span class="nav-text">doSubscribe（）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#List-children-zkClient-addChildListener-path-zkListener-为该节点设置监听"><span class="nav-number">1.0.1.3.2.</span> <span class="nav-text">List children = zkClient.addChildListener(path, zkListener);//为该节点设置监听</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FailbackRegistry-notify"><span class="nav-number">1.0.1.3.3.</span> <span class="nav-text">FailbackRegistry.notify</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#doNotify-url-listener-urls"><span class="nav-number">1.0.1.3.4.</span> <span class="nav-text">doNotify(url, listener, urls);</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AbstractRegistry类"><span class="nav-number">1.0.1.4.</span> <span class="nav-text">AbstractRegistry类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#doSaveProperties"><span class="nav-number">1.0.1.4.1.</span> <span class="nav-text">doSaveProperties()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RegistryProtocol类-1"><span class="nav-number">1.0.1.5.</span> <span class="nav-text">RegistryProtocol类</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        ﻿<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">宛亚菁</span>
+
+  
+</div>
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
