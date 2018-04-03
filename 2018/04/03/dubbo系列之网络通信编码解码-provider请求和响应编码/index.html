@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="dubbo," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="dubbo系列之网络通信编码解码-provider请求和响应编码简要这篇博客分两个部分： 1：provider 请求编码 2：provider响应结果编码 源码解析在provider收到consumer编码后的数据时，首先要开始解码，下面先看一下provider是如何解码的。 provider请求编码 NettyCodecAdapter.InternalDecoder类messageReceive">
+<meta name="keywords" content="dubbo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dubbo系列之网络通信编码解码-provider请求和响应编码">
+<meta property="og:url" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-provider请求和响应编码/index.html">
+<meta property="og:site_name" content="Yestermorrow">
+<meta property="og:description" content="dubbo系列之网络通信编码解码-provider请求和响应编码简要这篇博客分两个部分： 1：provider 请求编码 2：provider响应结果编码 源码解析在provider收到consumer编码后的数据时，首先要开始解码，下面先看一下provider是如何解码的。 provider请求编码 NettyCodecAdapter.InternalDecoder类messageReceive">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-provider请求和响应编码/data.png">
+<meta property="og:updated_time" content="2018-04-03T11:03:01.112Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dubbo系列之网络通信编码解码-provider请求和响应编码">
+<meta name="twitter:description" content="dubbo系列之网络通信编码解码-provider请求和响应编码简要这篇博客分两个部分： 1：provider 请求编码 2：provider响应结果编码 源码解析在provider收到consumer编码后的数据时，首先要开始解码，下面先看一下provider是如何解码的。 provider请求编码 NettyCodecAdapter.InternalDecoder类messageReceive">
+<meta name="twitter:image" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-provider请求和响应编码/data.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-provider请求和响应编码/"/>
+
+
+
+
+
+  <title>dubbo系列之网络通信编码解码-provider请求和响应编码 | Yestermorrow</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yestermorrow</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-provider请求和响应编码/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宛亚菁">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/cat.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yestermorrow">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dubbo系列之网络通信编码解码-provider请求和响应编码</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-03T19:03:01+08:00">
+                2018-04-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="dubbo系列之网络通信编码解码-provider请求和响应编码"><a href="#dubbo系列之网络通信编码解码-provider请求和响应编码" class="headerlink" title="dubbo系列之网络通信编码解码-provider请求和响应编码"></a>dubbo系列之网络通信编码解码-provider请求和响应编码</h1><h3 id="简要"><a href="#简要" class="headerlink" title="简要"></a>简要</h3><p>这篇博客分两个部分：</p>
+<p>1：provider 请求编码</p>
+<p>2：provider响应结果编码</p>
+<h3 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h3><p>在provider收到consumer编码后的数据时，首先要开始解码，下面先看一下provider是如何解码的。</p>
+<p><strong>provider请求编码</strong></p>
+<h4 id="NettyCodecAdapter-InternalDecoder类"><a href="#NettyCodecAdapter-InternalDecoder类" class="headerlink" title="NettyCodecAdapter.InternalDecoder类"></a>NettyCodecAdapter.InternalDecoder类</h4><h5 id="messageReceived"><a href="#messageReceived" class="headerlink" title="messageReceived()"></a>messageReceived()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msg = codec.decode(channel, message);</span><br></pre></td></tr></table></figure>
+<h4 id="ExchangeCodec类"><a href="#ExchangeCodec类" class="headerlink" title="ExchangeCodec类"></a>ExchangeCodec类</h4><h5 id="decode"><a href="#decode" class="headerlink" title="decode()"></a>decode()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public Object decode(Channel channel, ChannelBuffer buffer) throws IOException &#123;</span><br><span class="line">    int readable = buffer.readableBytes();//消息体长度</span><br><span class="line">    byte[] header = new byte[Math.min(readable, HEADER_LENGTH)];//消息头</span><br><span class="line">    buffer.readBytes(header);//读消息体的16个字节</span><br><span class="line">    return decode(channel, buffer, readable, header);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>取出在consumer请求编码阶段传入的消息体长度和消息头。</p>
+<h5 id="decode-1"><a href="#decode-1" class="headerlink" title="decode()"></a>decode()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] header) throws IOException &#123;</span><br><span class="line">    // check magic number.</span><br><span class="line">    // 检查前两个字节是否是指定魔数</span><br><span class="line">    if (readable &gt; 0 &amp;&amp; header[0] != MAGIC_HIGH</span><br><span class="line">            || readable &gt; 1 &amp;&amp; header[1] != MAGIC_LOW) &#123;</span><br><span class="line">        int length = header.length;</span><br><span class="line">        if (header.length &lt; readable) &#123;</span><br><span class="line">            header = Bytes.copyOf(header, readable);</span><br><span class="line">            buffer.readBytes(header, length, readable - length);</span><br><span class="line">        &#125;</span><br><span class="line">        for (int i = 1; i &lt; header.length - 1; i++) &#123;</span><br><span class="line">            if (header[i] == MAGIC_HIGH &amp;&amp; header[i + 1] == MAGIC_LOW) &#123;</span><br><span class="line">                buffer.readerIndex(buffer.readerIndex() - header.length + i);</span><br><span class="line">                header = Bytes.copyOf(header, i);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return super.decode(channel, buffer, readable, header);</span><br><span class="line">    &#125;</span><br><span class="line">    // check length.</span><br><span class="line">    if (readable &lt; HEADER_LENGTH) &#123;</span><br><span class="line">        return DecodeResult.NEED_MORE_INPUT;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // get data length.</span><br><span class="line">    //取出消息体总长度：第十三个字节到第十六个字节</span><br><span class="line">    int len = Bytes.bytes2int(header, 12);</span><br><span class="line">    checkPayload(channel, len);</span><br><span class="line"></span><br><span class="line">    int tt = len + HEADER_LENGTH;</span><br><span class="line">    if (readable &lt; tt) &#123;//对消息体进行检查</span><br><span class="line">        return DecodeResult.NEED_MORE_INPUT;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // limit input stream.</span><br><span class="line">    ChannelBufferInputStream is = new ChannelBufferInputStream(buffer, len);</span><br><span class="line"></span><br><span class="line">    try &#123;</span><br><span class="line">        return decodeBody(channel, is, header);//解码，debug</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        if (is.available() &gt; 0) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                if (logger.isWarnEnabled()) &#123;</span><br><span class="line">                    logger.warn(&quot;Skip input stream &quot; + is.available());</span><br><span class="line">                &#125;</span><br><span class="line">                StreamUtils.skipUnusedStream(is);</span><br><span class="line">            &#125; catch (IOException e) &#123;</span><br><span class="line">                logger.warn(e.getMessage(), e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="decodeBody"><a href="#decodeBody" class="headerlink" title="decodeBody()"></a>decodeBody()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">protected Object decodeBody(Channel channel, InputStream is, byte[] header) throws IOException &#123;</span><br><span class="line">    //取第三个字节，代表是双向还是单向</span><br><span class="line">    byte flag = header[2], proto = (byte) (flag &amp; SERIALIZATION_MASK);</span><br><span class="line">    Serialization s = CodecSupport.getSerialization(channel.getUrl(), proto);</span><br><span class="line">    // get request id.</span><br><span class="line">    //取第5到第12个字节代表request id</span><br><span class="line">    long id = Bytes.bytes2long(header, 4);</span><br><span class="line">    if ((flag &amp; FLAG_REQUEST) == 0) &#123;//单向</span><br><span class="line">        ...</span><br><span class="line">    &#125; else &#123;//双向</span><br><span class="line">        // decode request.</span><br><span class="line">        //还原这个request</span><br><span class="line">        Request req = new Request(id);</span><br><span class="line">        req.setVersion(&quot;2.0.0&quot;);</span><br><span class="line">        req.setTwoWay((flag &amp; FLAG_TWOWAY) != 0);</span><br><span class="line">        if ((flag &amp; FLAG_EVENT) != 0) &#123;</span><br><span class="line">            req.setEvent(Request.HEARTBEAT_EVENT);</span><br><span class="line">        &#125;</span><br><span class="line">        try &#123;</span><br><span class="line">            Object data;</span><br><span class="line">            if (req.isHeartbeat()) &#123;</span><br><span class="line">                data = decodeHeartbeatData(channel, deserialize(s, channel.getUrl(), is));</span><br><span class="line">            &#125; else if (req.isEvent()) &#123;</span><br><span class="line">                data = decodeEventData(channel, deserialize(s, channel.getUrl(), is));</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                DecodeableRpcInvocation inv;</span><br><span class="line">                if (channel.getUrl().getParameter(</span><br><span class="line">                        Constants.DECODE_IN_IO_THREAD_KEY,</span><br><span class="line">                        Constants.DEFAULT_DECODE_IN_IO_THREAD)) &#123;</span><br><span class="line">                    inv = new DecodeableRpcInvocation(channel, req, is, proto);</span><br><span class="line">                    inv.decode();</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    inv = new DecodeableRpcInvocation(channel, req,</span><br><span class="line">                            new UnsafeByteArrayInputStream(readMessageData(is)), proto);</span><br><span class="line">                &#125;</span><br><span class="line">                data = inv;//data赋值</span><br><span class="line">            &#125;</span><br><span class="line">            req.setData(data);</span><br><span class="line">        &#125; catch (Throwable t) &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">        return req;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>data的值</p>
+<p><img src="/2018/04/03/dubbo系列之网络通信编码解码-provider请求和响应编码/data.png" alt="data"></p>
+<p>这样，整个provider解码的过程就结束了</p>
+<p><strong>provider响应结果编码</strong></p>
+<p>所谓响应结果编码，也就是对DemoServiceImpl类中return语句的编码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">return &quot;Hello &quot; + name + &quot;, response form provider: &quot; + RpcContext.getContext().getLocalAddress();</span><br></pre></td></tr></table></figure>
+<h4 id="NettyCodecAdapter-InternalEncoder类"><a href="#NettyCodecAdapter-InternalEncoder类" class="headerlink" title="NettyCodecAdapter.InternalEncoder类"></a>NettyCodecAdapter.InternalEncoder类</h4><h5 id="encode"><a href="#encode" class="headerlink" title="encode()"></a>encode()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">codec.encode(channel, buffer, msg);</span><br></pre></td></tr></table></figure>
+<h4 id="ExchangeCodec类-1"><a href="#ExchangeCodec类-1" class="headerlink" title="ExchangeCodec类"></a>ExchangeCodec类</h4><h5 id="encode-1"><a href="#encode-1" class="headerlink" title="encode()"></a>encode()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">else if (msg instanceof Response) &#123;//响应</span><br><span class="line">    encodeResponse(channel, buffer, (Response) msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="encodeResponse"><a href="#encodeResponse" class="headerlink" title="encodeResponse()"></a>encodeResponse()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">protected void encodeResponse(Channel channel, ChannelBuffer buffer, Response res) throws IOException &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        Serialization serialization = getSerialization(channel);</span><br><span class="line">        // header.</span><br><span class="line">        byte[] header = new byte[HEADER_LENGTH];</span><br><span class="line">        // set magic number.</span><br><span class="line">        Bytes.short2bytes(MAGIC, header);</span><br><span class="line">        // set request and serialization flag.</span><br><span class="line">        header[2] = serialization.getContentTypeId();//heeder第二位代表序列化ID</span><br><span class="line">        if (res.isHeartbeat()) header[2] |= FLAG_EVENT;</span><br><span class="line">        // set response status.</span><br><span class="line">        byte status = res.getStatus();</span><br><span class="line">        header[3] = status;//第四个字节为20，代表&quot;ok&quot;</span><br><span class="line">        // set request id.</span><br><span class="line">        Bytes.long2bytes(res.getId(), header, 4);</span><br><span class="line"></span><br><span class="line">        int savedWriteIndex = buffer.writerIndex();</span><br><span class="line">        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);</span><br><span class="line">        ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);</span><br><span class="line">        ObjectOutput out = serialization.serialize(channel.getUrl(), bos);</span><br><span class="line">        // encode response data or error message.</span><br><span class="line">        if (status == Response.OK) &#123;</span><br><span class="line">            if (res.isHeartbeat()) &#123;</span><br><span class="line">                encodeHeartbeatData(channel, out, res.getResult());</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                encodeResponseData(channel, out, res.getResult());//debug</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else out.writeUTF(res.getErrorMessage());</span><br><span class="line">        out.flushBuffer();</span><br><span class="line">        bos.flush();</span><br><span class="line">        bos.close();</span><br><span class="line"></span><br><span class="line">        int len = bos.writtenBytes();</span><br><span class="line">        checkPayload(channel, len);</span><br><span class="line">        Bytes.int2bytes(len, header, 12);</span><br><span class="line">        // write</span><br><span class="line">        buffer.writerIndex(savedWriteIndex);</span><br><span class="line">        buffer.writeBytes(header); // write header.</span><br><span class="line">        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);//写入消息头和消息体总长度</span><br><span class="line">    &#125; catch (Throwable t) &#123;</span><br><span class="line">        // 发送失败信息给Consumer，否则Consumer只能等超时了</span><br><span class="line">        if (!res.isEvent() &amp;&amp; res.getStatus() != Response.BAD_RESPONSE) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                // FIXME 在Codec中打印出错日志？在IoHanndler的caught中统一处理？</span><br><span class="line">                logger.warn(&quot;Fail to encode response: &quot; + res + &quot;, send bad_response info instead, cause: &quot; + t.getMessage(), t);</span><br><span class="line"></span><br><span class="line">                Response r = new Response(res.getId(), res.getVersion());</span><br><span class="line">                r.setStatus(Response.BAD_RESPONSE);</span><br><span class="line">                r.setErrorMessage(&quot;Failed to send response: &quot; + res + &quot;, cause: &quot; + StringUtils.toString(t));</span><br><span class="line">                channel.send(r);</span><br><span class="line"></span><br><span class="line">                return;</span><br><span class="line">            &#125; ...</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="encodeResponseData"><a href="#encodeResponseData" class="headerlink" title="encodeResponseData()"></a>encodeResponseData()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">protected void encodeResponseData(Channel channel, ObjectOutput out, Object data) throws IOException &#123;</span><br><span class="line">    Result result = (Result) data;</span><br><span class="line"></span><br><span class="line">    Throwable th = result.getException();</span><br><span class="line">    if (th == null) &#123;</span><br><span class="line">        Object ret = result.getValue();</span><br><span class="line">        if (ret == null) &#123;//为空</span><br><span class="line">            out.writeByte(RESPONSE_NULL_VALUE);//写入状态：2</span><br><span class="line">        &#125; else &#123;//有值</span><br><span class="line">            out.writeByte(RESPONSE_VALUE);//写入状态：1</span><br><span class="line">            out.writeObject(ret);//写入值</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; else &#123;//异常</span><br><span class="line">        out.writeByte(RESPONSE_WITH_EXCEPTION);//写入状态：3</span><br><span class="line">        out.writeObject(th);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以看到，虽然provider和consumer的消息体还是有一些区别的</p>
+<p><strong>总结一下</strong></p>
+<p>dubbo的消息头是一个定长的 16个字节。<br>第1-2个字节：是一个魔数数字：就是一个固定的数字<br>第3个字节：序列号组件类型，它用于和客户端约定的序列号编码号<br>第四个字节：它是response的结果响应码  例如 OK=20<br>第5-12个字节：请求id：long型8个字节。异步变同步的全局唯一ID，用来做consumer和provider的来回通信标记。<br>第13-16个字节：消息体的长度，也就是消息头+请求数据的长度。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/dubbo/" rel="tag"># dubbo</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/" rel="next" title="dubbo系列之网络通信编码解码-consumer请求编码">
+                <i class="fa fa-chevron-left"></i> dubbo系列之网络通信编码解码-consumer请求编码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/03/dubbo系列之网络通信编码解码-consumer响应结果编码/" rel="prev" title="dubbo系列之网络通信编码解码-consumer响应结果编码">
+                dubbo系列之网络通信编码解码-consumer响应结果编码 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/cat.jpg"
+                alt="宛亚菁" />
+            
+              <p class="site-author-name" itemprop="name">宛亚菁</p>
+              <p class="site-description motion-element" itemprop="description">生活不止眼前的苟且</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yestermorrow" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#dubbo系列之网络通信编码解码-provider请求和响应编码"><span class="nav-number">1.</span> <span class="nav-text">dubbo系列之网络通信编码解码-provider请求和响应编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简要"><span class="nav-number">1.0.1.</span> <span class="nav-text">简要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码解析"><span class="nav-number">1.0.2.</span> <span class="nav-text">源码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#NettyCodecAdapter-InternalDecoder类"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">NettyCodecAdapter.InternalDecoder类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#messageReceived"><span class="nav-number">1.0.2.1.1.</span> <span class="nav-text">messageReceived()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ExchangeCodec类"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">ExchangeCodec类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#decode"><span class="nav-number">1.0.2.2.1.</span> <span class="nav-text">decode()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#decode-1"><span class="nav-number">1.0.2.2.2.</span> <span class="nav-text">decode()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#decodeBody"><span class="nav-number">1.0.2.2.3.</span> <span class="nav-text">decodeBody()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NettyCodecAdapter-InternalEncoder类"><span class="nav-number">1.0.2.3.</span> <span class="nav-text">NettyCodecAdapter.InternalEncoder类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#encode"><span class="nav-number">1.0.2.3.1.</span> <span class="nav-text">encode()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ExchangeCodec类-1"><span class="nav-number">1.0.2.4.</span> <span class="nav-text">ExchangeCodec类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#encode-1"><span class="nav-number">1.0.2.4.1.</span> <span class="nav-text">encode()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#encodeResponse"><span class="nav-number">1.0.2.4.2.</span> <span class="nav-text">encodeResponse()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#encodeResponseData"><span class="nav-number">1.0.2.4.3.</span> <span class="nav-text">encodeResponseData()</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        ﻿<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">宛亚菁</span>
+
+  
+</div>
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
