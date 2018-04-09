@@ -89,7 +89,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/协议头约定.jpg">
 <meta property="og:image" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/粘包和拆包.png">
-<meta property="og:updated_time" content="2018-04-03T11:03:06.327Z">
+<meta property="og:updated_time" content="2018-04-08T01:53:13.474Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="dubbo系列之网络通信编码解码-consumer请求编码">
 <meta name="twitter:description" content="dubbo系列之网络通信编码解码-consumer请求编码简要什么是编码、解码？ 编码（Encode）称为序列化（serialization），它将对象序列化为字节数组，用于网络传输、数据持久化或者其它用途。 解码（Decode）反序列化（deserialization）把从网络、磁盘等读取的字节数组还原成原始对象（通常是原始对象的拷贝），以方便后续的业务逻辑操作。 看一张dubbo的通讯协议图">
@@ -312,10 +312,14 @@
 <p>为什么dubbo要用自己的编解码呢？因为tcp会出现粘包和拆包的问题，只有在出现粘包和拆包的情况下，才会调用dubbo自己的协议来处理这种情况。</p>
 <p>先来一张图，了解一下什么是粘包和拆包</p>
 <p><img src="/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/粘包和拆包.png" alt="粘包和拆包"></p>
+<p><strong>TCP粘包拆包发生的原因</strong></p>
+<p>1.应用程序write写入的字节大小大于套接口发送缓冲区大小</p>
+<p>2.进行MSS大小的TCP分段</p>
+<p>3.以太网帧的payload(有效数据)大于MTU进行IP分片</p>
 <p><strong>以往业界时如何解决粘包和拆包的？</strong></p>
 <p>1.消息的定长，例如定1000个字节</p>
 <p>2.就是在包尾增加回车或空格等特殊字符作为切割。典型的FTP协议</p>
-<p>3.将消息分为消息头消息体。例如 dubbo</p>
+<p>3.将消息分为消息头消息体，消息头中包含表示消息总长度（或者消息体长度）的字段，通常涉及思路为消息头的第一个字段使用int32来表示消息的总长度。例如 dubbo</p>
 <p>本篇博客就是介绍——将消息分为消息头消息体。</p>
 <h3 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h3><h4 id="NettyCodecAdapter类"><a href="#NettyCodecAdapter类" class="headerlink" title="NettyCodecAdapter类"></a>NettyCodecAdapter类</h4><h5 id="encode"><a href="#encode" class="headerlink" title="encode()"></a>encode()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">protected Object encode(ChannelHandlerContext ctx, Channel ch, Object msg) throws Exception &#123;</span><br><span class="line">    com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =</span><br><span class="line">            com.alibaba.dubbo.remoting.buffer.ChannelBuffers.dynamicBuffer(1024);</span><br><span class="line">    NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);</span><br><span class="line">    try &#123;</span><br><span class="line">        codec.encode(channel, buffer, msg);//debug</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        NettyChannel.removeChannelIfDisconnected(ch);</span><br><span class="line">    &#125;</span><br><span class="line">    return ChannelBuffers.wrappedBuffer(buffer.toByteBuffer());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h4 id="ExchangeCodec类"><a href="#ExchangeCodec类" class="headerlink" title="ExchangeCodec类"></a>ExchangeCodec类</h4><h5 id="encode-1"><a href="#encode-1" class="headerlink" title="encode()"></a>encode()</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public void encode(Channel channel, ChannelBuffer buffer, Object msg) throws IOException &#123;</span><br><span class="line">    if (msg instanceof Request) &#123;//consumer请求的时候，是进这个循环</span><br><span class="line">        encodeRequest(channel, buffer, (Request) msg);//debug</span><br><span class="line">    &#125; else if (msg instanceof Response) &#123;</span><br><span class="line">        encodeResponse(channel, buffer, (Response) msg);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        super.encode(channel, buffer, msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
