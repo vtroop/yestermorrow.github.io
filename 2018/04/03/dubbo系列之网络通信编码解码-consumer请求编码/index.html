@@ -89,7 +89,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/协议头约定.jpg">
 <meta property="og:image" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/粘包和拆包.png">
-<meta property="og:updated_time" content="2018-04-08T01:53:13.474Z">
+<meta property="og:updated_time" content="2018-04-10T11:33:35.276Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="dubbo系列之网络通信编码解码-consumer请求编码">
 <meta name="twitter:description" content="dubbo系列之网络通信编码解码-consumer请求编码简要什么是编码、解码？ 编码（Encode）称为序列化（serialization），它将对象序列化为字节数组，用于网络传输、数据持久化或者其它用途。 解码（Decode）反序列化（deserialization）把从网络、磁盘等读取的字节数组还原成原始对象（通常是原始对象的拷贝），以方便后续的业务逻辑操作。 看一张dubbo的通讯协议图">
@@ -312,10 +312,6 @@
 <p>为什么dubbo要用自己的编解码呢？因为tcp会出现粘包和拆包的问题，只有在出现粘包和拆包的情况下，才会调用dubbo自己的协议来处理这种情况。</p>
 <p>先来一张图，了解一下什么是粘包和拆包</p>
 <p><img src="/2018/04/03/dubbo系列之网络通信编码解码-consumer请求编码/粘包和拆包.png" alt="粘包和拆包"></p>
-<p><strong>TCP粘包拆包发生的原因</strong></p>
-<p>1.应用程序write写入的字节大小大于套接口发送缓冲区大小</p>
-<p>2.进行MSS大小的TCP分段</p>
-<p>3.以太网帧的payload(有效数据)大于MTU进行IP分片</p>
 <p><strong>以往业界时如何解决粘包和拆包的？</strong></p>
 <p>1.消息的定长，例如定1000个字节</p>
 <p>2.就是在包尾增加回车或空格等特殊字符作为切割。典型的FTP协议</p>
@@ -450,7 +446,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

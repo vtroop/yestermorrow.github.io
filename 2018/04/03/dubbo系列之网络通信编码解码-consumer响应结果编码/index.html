@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="dubbo系列之网络通信编码解码-consumer响应结果编码简要在收到provider返回的编码数据后，consumer要进行解码 源码解析NettyCodecAdapter.InternalDecoder类messageReceived()分两个部分 1234567891011121314151617181920//首先判断当前decoder对象的buffer中是否有可以读取的消息，若有，则合">
+<meta name="description" content="dubbo系列之网络通信编码解码-consumer响应结果编码简要在收到provider返回的编码数据后，consumer要进行解码，这时候可能会出现粘包和拆包的问题。 源码解析NettyCodecAdapter.InternalDecoder类messageReceived()分两个部分 1234567891011121314151617181920//首先判断当前decoder对象的buffe">
 <meta name="keywords" content="dubbo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="dubbo系列之网络通信编码解码-consumer响应结果编码">
 <meta property="og:url" content="http://yoursite.com/2018/04/03/dubbo系列之网络通信编码解码-consumer响应结果编码/index.html">
 <meta property="og:site_name" content="Yestermorrow">
-<meta property="og:description" content="dubbo系列之网络通信编码解码-consumer响应结果编码简要在收到provider返回的编码数据后，consumer要进行解码 源码解析NettyCodecAdapter.InternalDecoder类messageReceived()分两个部分 1234567891011121314151617181920//首先判断当前decoder对象的buffer中是否有可以读取的消息，若有，则合">
+<meta property="og:description" content="dubbo系列之网络通信编码解码-consumer响应结果编码简要在收到provider返回的编码数据后，consumer要进行解码，这时候可能会出现粘包和拆包的问题。 源码解析NettyCodecAdapter.InternalDecoder类messageReceived()分两个部分 1234567891011121314151617181920//首先判断当前decoder对象的buffe">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-08T01:53:13.473Z">
+<meta property="og:updated_time" content="2018-04-10T11:27:19.899Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="dubbo系列之网络通信编码解码-consumer响应结果编码">
-<meta name="twitter:description" content="dubbo系列之网络通信编码解码-consumer响应结果编码简要在收到provider返回的编码数据后，consumer要进行解码 源码解析NettyCodecAdapter.InternalDecoder类messageReceived()分两个部分 1234567891011121314151617181920//首先判断当前decoder对象的buffer中是否有可以读取的消息，若有，则合">
+<meta name="twitter:description" content="dubbo系列之网络通信编码解码-consumer响应结果编码简要在收到provider返回的编码数据后，consumer要进行解码，这时候可能会出现粘包和拆包的问题。 源码解析NettyCodecAdapter.InternalDecoder类messageReceived()分两个部分 1234567891011121314151617181920//首先判断当前decoder对象的buffe">
 
 
 
@@ -300,7 +300,7 @@
       
 
       
-        <h1 id="dubbo系列之网络通信编码解码-consumer响应结果编码"><a href="#dubbo系列之网络通信编码解码-consumer响应结果编码" class="headerlink" title="dubbo系列之网络通信编码解码-consumer响应结果编码"></a>dubbo系列之网络通信编码解码-consumer响应结果编码</h1><h3 id="简要"><a href="#简要" class="headerlink" title="简要"></a>简要</h3><p>在收到provider返回的编码数据后，consumer要进行解码</p>
+        <h1 id="dubbo系列之网络通信编码解码-consumer响应结果编码"><a href="#dubbo系列之网络通信编码解码-consumer响应结果编码" class="headerlink" title="dubbo系列之网络通信编码解码-consumer响应结果编码"></a>dubbo系列之网络通信编码解码-consumer响应结果编码</h1><h3 id="简要"><a href="#简要" class="headerlink" title="简要"></a>简要</h3><p>在收到provider返回的编码数据后，consumer要进行解码，这时候可能会出现粘包和拆包的问题。</p>
 <h3 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h3><h4 id="NettyCodecAdapter-InternalDecoder类"><a href="#NettyCodecAdapter-InternalDecoder类" class="headerlink" title="NettyCodecAdapter.InternalDecoder类"></a>NettyCodecAdapter.InternalDecoder类</h4><h5 id="messageReceived"><a href="#messageReceived" class="headerlink" title="messageReceived()"></a>messageReceived()</h5><p>分两个部分</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">//首先判断当前decoder对象的buffer中是否有可以读取的消息，若有，则合并。并将对象赋值给message局部变量</span><br><span class="line">if (buffer.readable()) &#123;</span><br><span class="line">    if (buffer instanceof DynamicChannelBuffer) &#123;</span><br><span class="line">        buffer.writeBytes(input.toByteBuffer());</span><br><span class="line">        message = buffer;//message获取当前channel的inbound消息</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        int size = buffer.readableBytes() + input.readableBytes();</span><br><span class="line">        message = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.dynamicBuffer(</span><br><span class="line">                size &gt; bufferSize ? size : bufferSize);</span><br><span class="line">        message.writeBytes(buffer, buffer.readableBytes());</span><br><span class="line">        message.writeBytes(input.toByteBuffer());</span><br><span class="line">    &#125;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    message = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.wrappedBuffer(</span><br><span class="line">            input.toByteBuffer());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NettyChannel channel = NettyChannel.getOrAddChannel(ctx.getChannel(), url, handler);</span><br><span class="line">Object msg;</span><br><span class="line">int saveReaderIndex;</span><br></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">                // decode object.</span><br><span class="line">                do &#123;</span><br><span class="line">                    //保存当前message的读索引，用于后期消息回滚</span><br><span class="line">                    saveReaderIndex = message.readerIndex();</span><br><span class="line">                    try &#123;</span><br><span class="line">                        //DubboCountCodec的decode每次只会解析出一个完整的dubbo协议栈</span><br><span class="line">                        msg = codec.decode(channel, message);//debug</span><br><span class="line">                    &#125; catch (IOException e) &#123;</span><br><span class="line">                        buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;</span><br><span class="line">                        throw e;</span><br><span class="line">                    &#125;</span><br><span class="line">                    if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) &#123;</span><br><span class="line">                        message.readerIndex(saveReaderIndex);</span><br><span class="line">                        break;</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        if (saveReaderIndex == message.readerIndex()) &#123;</span><br><span class="line">                            buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;</span><br><span class="line">                            throw new IOException(&quot;Decode without read data.&quot;);</span><br><span class="line">                        &#125;</span><br><span class="line">                        if (msg != null) &#123;</span><br><span class="line">                            Channels.fireMessageReceived(ctx, msg, event.getRemoteAddress());</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; while (message.readable());</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                if (message.readable()) &#123;</span><br><span class="line">                    message.discardReadBytes();</span><br><span class="line">                    buffer = message;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;</span><br><span class="line">                &#125;</span><br><span class="line">                NettyChannel.removeChannelIfDisconnected(ctx.getChannel());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
@@ -356,6 +356,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/10/dubbo系列之粘包和拆包/" rel="prev" title="dubbo系列之粘包和拆包">
+                dubbo系列之粘包和拆包 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -436,7 +440,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
