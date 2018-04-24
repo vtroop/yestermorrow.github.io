@@ -79,21 +79,21 @@
 
 
 
-<meta name="description" content="并发系列之ThreadLocal参考链接： 线程封闭在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭到某个线程内部，从而避免出现多个线程共享同一个连接的情况。而线程封闭总共有三种类型的呈现形式">
+<meta name="description" content="并发系列之ThreadLocal参考链接：https://www.cnblogs.com/micrari/p/6790229.html 线程封闭在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭">
 <meta name="keywords" content="并发">
 <meta property="og:type" content="article">
 <meta property="og:title" content="并发系列之ThreadLocal">
 <meta property="og:url" content="http://yoursite.com/2018/04/17/并发系列之ThreadLocal/index.html">
 <meta property="og:site_name" content="Yestermorrow">
-<meta property="og:description" content="并发系列之ThreadLocal参考链接： 线程封闭在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭到某个线程内部，从而避免出现多个线程共享同一个连接的情况。而线程封闭总共有三种类型的呈现形式">
+<meta property="og:description" content="并发系列之ThreadLocal参考链接：https://www.cnblogs.com/micrari/p/6790229.html 线程封闭在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2018/04/17/并发系列之ThreadLocal/ThreadLocal结构图.jpg">
 <meta property="og:image" content="http://yoursite.com/2018/04/17/并发系列之ThreadLocal/ThreadLocalMap结构图.jpg">
 <meta property="og:image" content="http://yoursite.com/2018/04/17/并发系列之ThreadLocal/ThreadLocalMap内部存储结构.png">
-<meta property="og:updated_time" content="2018-04-19T05:55:14.308Z">
+<meta property="og:updated_time" content="2018-04-24T02:35:32.749Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="并发系列之ThreadLocal">
-<meta name="twitter:description" content="并发系列之ThreadLocal参考链接： 线程封闭在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭到某个线程内部，从而避免出现多个线程共享同一个连接的情况。而线程封闭总共有三种类型的呈现形式">
+<meta name="twitter:description" content="并发系列之ThreadLocal参考链接：https://www.cnblogs.com/micrari/p/6790229.html 线程封闭在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭">
 <meta name="twitter:image" content="http://yoursite.com/2018/04/17/并发系列之ThreadLocal/ThreadLocal结构图.jpg">
 
 
@@ -304,7 +304,7 @@
       
 
       
-        <h1 id="并发系列之ThreadLocal"><a href="#并发系列之ThreadLocal" class="headerlink" title="并发系列之ThreadLocal"></a>并发系列之ThreadLocal</h1><p>参考链接：</p>
+        <h1 id="并发系列之ThreadLocal"><a href="#并发系列之ThreadLocal" class="headerlink" title="并发系列之ThreadLocal"></a>并发系列之ThreadLocal</h1><p>参考链接：<a href="https://www.cnblogs.com/micrari/p/6790229.html" target="_blank" rel="noopener">https://www.cnblogs.com/micrari/p/6790229.html</a></p>
 <h3 id="线程封闭"><a href="#线程封闭" class="headerlink" title="线程封闭"></a>线程封闭</h3><p>在《Java变更发编程实战》一书中提到，“当访问共享的可变数据时，通常需要使用同步。一种避免使用同步的方式就是不共享数据”。因此提出了“线程封闭“的概念，一种经常使用线程封闭的应用场景就是JDBC的Connection，通过线程封闭技术，可以把连接对象封闭到某个线程内部，从而避免出现多个线程共享同一个连接的情况。而线程封闭总共有三种类型的呈现形式：</p>
 <p>(1)Ad-hoc线程封闭。维护线程封闭性的职责有程序实现来承担，然而这种实现方式是脆弱的；</p>
 <p>(2)栈封闭。实际上通过尽量使用局部变量的方式，避免其他线程获取数据；</p>
