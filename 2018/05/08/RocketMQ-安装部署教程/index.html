@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="RocketMQ," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="RocketMQ-安装部署教程前期准备环境准备Java8安装 Linux系统 安装包rocketmq-4.2.0.zip 安装解压缩zip安装包到指定文件夹 1unzip rocketmq-all-4.2.0-bin-release.zip -d rocketmq-4,2,0 部署参考mq官方quickstart文档 ：http://rocketmq.apache.org/docs/quick-s">
+<meta name="keywords" content="RocketMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ-安装部署教程">
+<meta property="og:url" content="http://yoursite.com/2018/05/08/RocketMQ-安装部署教程/index.html">
+<meta property="og:site_name" content="Yestermorrow">
+<meta property="og:description" content="RocketMQ-安装部署教程前期准备环境准备Java8安装 Linux系统 安装包rocketmq-4.2.0.zip 安装解压缩zip安装包到指定文件夹 1unzip rocketmq-all-4.2.0-bin-release.zip -d rocketmq-4,2,0 部署参考mq官方quickstart文档 ：http://rocketmq.apache.org/docs/quick-s">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/05/08/RocketMQ-安装部署教程/1.jpg">
+<meta property="og:updated_time" content="2018-05-08T11:57:31.933Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RocketMQ-安装部署教程">
+<meta name="twitter:description" content="RocketMQ-安装部署教程前期准备环境准备Java8安装 Linux系统 安装包rocketmq-4.2.0.zip 安装解压缩zip安装包到指定文件夹 1unzip rocketmq-all-4.2.0-bin-release.zip -d rocketmq-4,2,0 部署参考mq官方quickstart文档 ：http://rocketmq.apache.org/docs/quick-s">
+<meta name="twitter:image" content="http://yoursite.com/2018/05/08/RocketMQ-安装部署教程/1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/08/RocketMQ-安装部署教程/"/>
+
+
+
+
+
+  <title>RocketMQ-安装部署教程 | Yestermorrow</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yestermorrow</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/08/RocketMQ-安装部署教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宛亚菁">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/cat.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yestermorrow">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RocketMQ-安装部署教程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-08T19:57:31+08:00">
+                2018-05-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="RocketMQ-安装部署教程"><a href="#RocketMQ-安装部署教程" class="headerlink" title="RocketMQ-安装部署教程"></a>RocketMQ-安装部署教程</h1><h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><h4 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h4><p>Java8安装</p>
+<p>Linux系统</p>
+<h4 id="安装包"><a href="#安装包" class="headerlink" title="安装包"></a>安装包</h4><p>rocketmq-4.2.0.zip</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>解压缩zip安装包到指定文件夹</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unzip rocketmq-all-4.2.0-bin-release.zip -d rocketmq-4,2,0</span><br></pre></td></tr></table></figure>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p>参考mq官方quickstart文档 ：<a href="http://rocketmq.apache.org/docs/quick-start/" target="_blank" rel="noopener">http://rocketmq.apache.org/docs/quick-start/</a></p>
+<h5 id="启动Name-Server"><a href="#启动Name-Server" class="headerlink" title="启动Name Server"></a>启动Name Server</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; nohup sh bin/mqnamesrv &amp;</span><br><span class="line">&gt; tail -f ~/logs/rocketmqlogs/namesrv.log</span><br><span class="line">The Name Server boot success...</span><br></pre></td></tr></table></figure>
+<p><strong>注：</strong>启动过程中可能报错显示内存不足，报错信息如下： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># There is insufficient memory for the Java Runtime Environment to continue.</span><br><span class="line"># Native memory allocation (mmap) failed to map 33554432 bytes for committing 	     reserved memory.</span><br></pre></td></tr></table></figure>
+<p>需修改bin文件夹下的runserver.sh文件，改成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPT=&quot;$&#123;JAVA_OPT&#125; -server -Xms256m -Xmx256m -Xmn128m -XX:PermSize=128m -XX:MaxPermSize=320m&quot;</span><br></pre></td></tr></table></figure>
+<p>同理，修改runbroker.sh文件，改成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPT=&quot;$&#123;JAVA_OPT&#125; -server -Xms256m -Xmx256m -Xmn128m</span><br></pre></td></tr></table></figure>
+<p>再同理，修改tools.sh文件，改成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JAVA_OPT=&quot;$&#123;JAVA_OPT&#125; -server -Xms256m -Xmx256m -Xmn128m -XX:PermSize=128m -XX:MaxPermSize=128m&quot;</span><br></pre></td></tr></table></figure>
+<h5 id="启动Broker"><a href="#启动Broker" class="headerlink" title="启动Broker"></a>启动Broker</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; nohup sh bin/mqbroker -n localhost:9876 autoCreateTopicEnable=true &amp;</span><br><span class="line">&gt; tail -f ~/logs/rocketmqlogs/broker.log </span><br><span class="line"> The broker[%s, 172.30.30.233:10911] boot success...</span><br></pre></td></tr></table></figure>
+<p><strong>注：</strong>官网上启动Broker用的命令就是<code>nohup sh bin/mqbroker -n localhost:9876 &amp;</code> ，这样启动后在后来运行Producer发送的时候会出现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">com.alibaba.rocketmq.client.exception.MQClientException: No route info of this topic, TopicTest1</span><br><span class="line">See http://docs.aliyun.com/cn#/pub/ons/faq/exceptions&amp;topic_not_exist for further details.</span><br><span class="line">    at com.alibaba.rocketmq.client.impl.producer.DefaultMQProducerImpl.sendDefaultImpl(DefaultMQProducerImpl.java:542)</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<p>autoCreateTopicEnable在broker配置文件里面默认是false，如果在配置文件里面改成true，就可以直接用<code>nohup sh bin/mqbroker -n localhost:9876 &amp;</code>启动了。</p>
+<h5 id="发送-amp-接收信息"><a href="#发送-amp-接收信息" class="headerlink" title="发送&amp;接收信息"></a>发送&amp;接收信息</h5><p>在发送/接收消息之前，我们需要告诉客户端服务器的ip。RocketMQ提供了多种实现此目的的方法。为简单起见，我们使用环境变量namesrvaddr</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; export NAMESRV_ADDR=localhost:9876</span><br><span class="line">&gt; sh bin/tools.sh org.apache.rocketmq.example.quickstart.Producer</span><br><span class="line">SendResult [sendStatus=SEND_OK, msgId= ...</span><br><span class="line"></span><br><span class="line">&gt; sh bin/tools.sh org.apache.rocketmq.example.quickstart.Consumer</span><br><span class="line">ConsumeMessageThread_%d Receive New Messages: [MessageExt...</span><br></pre></td></tr></table></figure>
+<p>看见日志飞速刷，就是启动成功了。</p>
+<h5 id="关闭服务器"><a href="#关闭服务器" class="headerlink" title="关闭服务器"></a>关闭服务器</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; sh bin/mqshutdown broker</span><br><span class="line">The mqbroker(36695) is running...</span><br><span class="line">Send shutdown request to mqbroker(36695) OK</span><br><span class="line"></span><br><span class="line">&gt; sh bin/mqshutdown namesrv</span><br><span class="line">The mqnamesrv(36664) is running...</span><br><span class="line">Send shutdown request to mqnamesrv(36664) OK</span><br></pre></td></tr></table></figure>
+<h4 id="本地测试类"><a href="#本地测试类" class="headerlink" title="本地测试类"></a>本地测试类</h4><p>ProducerTest——生产者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">public class ProducerTest &#123;</span><br><span class="line">    private static DefaultMQProducer producer = null;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        System.out.print(&quot;[----------]Start&quot;);</span><br><span class="line">        boolean result = false;</span><br><span class="line">        try &#123;</span><br><span class="line">            ProducerStart();</span><br><span class="line">            System.out.println(&quot;producer 启动成功&quot;);</span><br><span class="line">            SendMessage(&quot;qch_20170706&quot;, &quot;hello rocketmq!&quot;);</span><br><span class="line">        &#125;finally &#123;</span><br><span class="line">            producer.shutdown();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.print(&quot;[----------]Succeed&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private static boolean ProducerStart() &#123;</span><br><span class="line">        producer = new DefaultMQProducer(&quot;pro_qch_test&quot;);</span><br><span class="line">        producer.setNamesrvAddr(&quot;119.23.211.22:9876&quot;);</span><br><span class="line">        producer.setInstanceName(UUID.randomUUID().toString());</span><br><span class="line">        producer.setVipChannelEnabled(false);</span><br><span class="line">        try &#123;</span><br><span class="line">            producer.start();</span><br><span class="line">        &#125; catch (MQClientException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private static boolean SendMessage(String topic, String str) &#123;</span><br><span class="line">        Message msg = new Message(topic, str.getBytes());</span><br><span class="line">        try &#123;</span><br><span class="line">            producer.send(msg);</span><br><span class="line">        &#125; catch (MQClientException | RemotingException | MQBrokerException | InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ConsumerTest——消费者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public class ConsumerTest &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(&quot;con_qch_test&quot;);</span><br><span class="line">        consumer.setInstanceName(UUID.randomUUID().toString());</span><br><span class="line">        consumer.setConsumeMessageBatchMaxSize(32);</span><br><span class="line">        consumer.setNamesrvAddr(&quot;119.23.211.22:9876&quot;);</span><br><span class="line">        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);</span><br><span class="line">        consumer.registerMessageListener(new MessageListenerConcurrently() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public ConsumeConcurrentlyStatus consumeMessage(</span><br><span class="line">                    List&lt;MessageExt&gt; list, ConsumeConcurrentlyContext consumeConcurrentlyContext) &#123;</span><br><span class="line">                for(MessageExt me : list) &#123;</span><br><span class="line">                    System.out.print(new String(me.getBody()));</span><br><span class="line">                &#125;</span><br><span class="line">                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        try &#123;</span><br><span class="line">            consumer.subscribe(&quot;qch_20170706&quot;, &quot;*&quot;);</span><br><span class="line">            consumer.start();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>注：</strong>在本地启动的时候，可以会出现这个错误</p>
+<p><img src="/2018/05/08/RocketMQ-安装部署教程/1.jpg" alt="RocketMQ-安装部署教程"></p>
+<p>需要在conf/broker.conf文件里面添加brokerIP1=你的服务器IP，然后启动broker的时候用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sh bin/mqbroker -n localhost:9876 autoCrenohup sh bin/mqbroker -n localhost:9876 autoCreateTopicEnable=true -c ~/software/rocketmq-4.2.0/conf/broker.conf &amp;</span><br></pre></td></tr></table></figure>
+<p>看一下broker.log文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">2018-05-09 19:43:45 INFO main - load exist subscription group, SubscriptionGroupConfig [groupName=CID_ONS-HTTP-PROXY, consumeEnable=true, consumeFromMinEnable=true, consumeBroadcastEnable=true, retryQueueNums=1, retryMaxTimes=16, brokerId=0, whichBrokerWhenConsumeSlowly=1, notifyConsumerIdsChangedEnable=true]</span><br><span class="line">2018-05-09 19:43:45 INFO main - load exist subscription group, SubscriptionGroupConfig [groupName=FILTERSRV_CONSUMER, consumeEnable=true, consumeFromMinEnable=true, consumeBroadcastEnable=true, retryQueueNums=1, retryMaxTimes=16, brokerId=0, whichBrokerWhenConsumeSlowly=1, notifyConsumerIdsChangedEnable=true]</span><br><span class="line">2018-05-09 19:43:45 INFO main - load exist subscription group, SubscriptionGroupConfig [groupName=CID_ONSAPI_PULL, consumeEnable=true, consumeFromMinEnable=true, consumeBroadcastEnable=true, retryQueueNums=1, retryMaxTimes=16, brokerId=0, whichBrokerWhenConsumeSlowly=1, notifyConsumerIdsChangedEnable=true]</span><br><span class="line">2018-05-09 19:43:45 INFO main - load /root/store/config/subscriptionGroup.json OK</span><br><span class="line">2018-05-09 19:43:45 INFO main - load /root/store/config/consumerFilter.json OK</span><br><span class="line">2018-05-09 19:43:45 INFO main - load /root/store/config/delayOffset.json OK</span><br><span class="line">2018-05-09 19:43:46 INFO main - Set user specified name server address: localhost:9876</span><br><span class="line">2018-05-09 19:43:46 INFO PullRequestHoldService - PullRequestHoldService service started</span><br><span class="line">2018-05-09 19:43:47 INFO main - register broker to name server localhost:9876 OK</span><br><span class="line">2018-05-09 19:43:47 INFO main - The broker[broker-a, 119.23.211.22:10911] boot success. serializeType=JSON and name server is localhost:9876</span><br><span class="line">2018-05-09 19:43:56 INFO BrokerControllerScheduledThread1 - dispatch behind commit log 0 bytes</span><br><span class="line">2018-05-09 19:43:56 INFO BrokerControllerScheduledThread1 - Slave fall behind master: 974140 bytes</span><br><span class="line">2018-05-09 19:43:57 INFO BrokerControllerScheduledThread1 - register broker to name server localhost:9876 OK</span><br></pre></td></tr></table></figure>
+<p>再看一下<code>nohup sh bin/mqbroker -n localhost:9876 autoCreateTopicEnable=true &amp;</code> 命令启动的broker的log日志</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2018-05-09 19:39:02 INFO main - register broker to name server localhost:9876 OK</span><br><span class="line">2018-05-09 19:39:02 INFO main - The broker[izwz9f1jdvkslcnjfonvbiz, 172.18.213.113:10911] boot success. serializeType=JSON and name server is localhost:9876</span><br><span class="line">2018-05-09 19:39:12 INFO BrokerControllerScheduledThread1 - dispatch behind commit log 0 bytes</span><br><span class="line">2018-05-09 19:39:12 INFO BrokerControllerScheduledThread1 - Slave fall behind master: 974140 bytes</span><br><span class="line">2018-05-09 19:39:12 INFO BrokerControllerScheduledThread1 - register broker to name server localhost:9876 OK</span><br></pre></td></tr></table></figure>
+<p>貌似多加载了config文件夹下的几个配置。</p>
+<p>真是个深渊巨坑。。。。。。。。。。</p>
+<p>END</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/RocketMQ/" rel="tag"># RocketMQ</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/03/JDK8下的BlockingQueue源码解析/" rel="next" title="JDK8下的BlockingQueue源码解析">
+                <i class="fa fa-chevron-left"></i> JDK8下的BlockingQueue源码解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/cat.jpg"
+                alt="宛亚菁" />
+            
+              <p class="site-author-name" itemprop="name">宛亚菁</p>
+              <p class="site-description motion-element" itemprop="description">越努力越幸运</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yestermorrow" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RocketMQ-安装部署教程"><span class="nav-number">1.</span> <span class="nav-text">RocketMQ-安装部署教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#前期准备"><span class="nav-number">1.0.1.</span> <span class="nav-text">前期准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#环境准备"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装包"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">安装包</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装"><span class="nav-number">1.0.2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署"><span class="nav-number">1.0.3.</span> <span class="nav-text">部署</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#启动Name-Server"><span class="nav-number">1.0.3.0.1.</span> <span class="nav-text">启动Name Server</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#启动Broker"><span class="nav-number">1.0.3.0.2.</span> <span class="nav-text">启动Broker</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#发送-amp-接收信息"><span class="nav-number">1.0.3.0.3.</span> <span class="nav-text">发送&amp;接收信息</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#关闭服务器"><span class="nav-number">1.0.3.0.4.</span> <span class="nav-text">关闭服务器</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#本地测试类"><span class="nav-number">1.0.3.1.</span> <span class="nav-text">本地测试类</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        ﻿<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">宛亚菁</span>
+
+  
+</div>
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
